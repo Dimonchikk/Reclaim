@@ -4,7 +4,7 @@
 
 **Застосунок не обходить блокування активації і не знімає Apple ID без пароля власника.** Усі кроки ведуть до офіційних інструментів Apple.
 
-- Сайт: `https://dimonchikk.github.io/Reclaim/` (публікується з папки `site`)
+- Сайт: `https://dimonchikk.github.io/Reclaim/` (публікується з кореня гілки `main`)
 - Завантаження: [останній реліз](../../releases/latest)
 
 ## Що вміє
@@ -27,12 +27,12 @@ npm run dist
 Windows і драйвер Apple (служба Apple Mobile Device Service) з застосунку Apple Devices (Microsoft Store) або iTunes. Застосунок перевіряє це сам і лише пропонує відкрити офіційне встановлення, нічого не завантажуючи приховано. Утиліти libimobiledevice вбудовані в `bin/`; походження й ліцензії: [`bin/NOTICE.txt`](bin/NOTICE.txt).
 
 ## Сайт (GitHub Pages)
-Папка `site/` — чистий HTML, CSS і JS без збірки. Репозиторій, назва файлу інсталятора й версія задаються в одному місці: `site/config.js`. На GitHub Pages репозиторій визначається з адреси автоматично, а кнопка «Завантажити» веде прямо на `releases/latest/download/Reclaim-setup.exe`; номер версії сайт бере з останнього релізу. Знімки застосунку лежать у `site/screenshots/` (світлі й `-dark`).
+Сайт лежить у корені репозиторію: `index.html`, `script.js`, `config.js`, `icon.png` і папка `screenshots/` (світлі знімки та `-dark`). Це чистий HTML, CSS і JS без збірки. Репозиторій, назва файлу інсталятора й версія задаються в одному місці: `config.js`. На GitHub Pages репозиторій визначається з адреси автоматично, а кнопка «Завантажити» веде прямо на `releases/latest/download/Reclaim-setup.exe`; номер версії сайт бере з останнього релізу. Файл `.nojekyll` вимикає обробку Jekyll.
 
-Увімкнення: **Settings → Pages → Source: GitHub Actions**. Далі сайт публікує `.github/workflows/pages.yml` після кожного пушу в `main`, що змінює `site/`.
+Налаштування: **Settings → Pages → Source: Deploy from a branch → main / (root)**. Сайт оновлюється після кожного пушу в `main`. Сайт не потрапляє в інсталятор: у збірку входять лише файли зі списку `build.files` у `package.json`.
 
 ## Випуск
-1. Підніміть `version` у `package.json` (і `site/config.js`) та допишіть розділ `## номер` у `CHANGES.md`.
+1. Підніміть `version` у `package.json` (і `config.js`) та допишіть розділ `## номер` у `CHANGES.md`.
 2. Запуште в `main`.
 3. На GitHub: **Actions → Збирання → Run workflow**, у полі «Версія» впишіть номер, наприклад `0.3.0`.
 4. Workflow збере інсталятор на Windows і створить **чернетку** релізу з описом із `CHANGES.md`. Перевірте файл і натисніть **Publish release**: після цього кнопка на сайті й перевірка оновлень у застосунку побачать нову версію.
@@ -49,8 +49,8 @@ CHANGES.md            журнал змін (розділ «## номер» ст
 build/                іконка застосунку та інсталятора
 src/                  інтерфейс застосунку
 bin/                  вбудовані утиліти libimobiledevice + NOTICE.txt
-site/                 лендинг для GitHub Pages
-.github/workflows/    pages.yml, release.yml
+index.html, script.js, config.js, icon.png, screenshots/   сайт (GitHub Pages)
+.github/workflows/    release.yml (збирання інсталятора)
 ```
 
 ## Ліцензії
