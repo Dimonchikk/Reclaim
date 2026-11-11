@@ -1,0 +1,26 @@
+Вбудовані утиліти (ця папка)
+============================
+
+Файли: ideviceinfo.exe, idevice_id.exe, idevicepair.exe та бібліотеки,
+від яких вони залежать (libimobiledevice, libplist, libusbmuxd,
+libimobiledevice-glue, OpenSSL 3).
+
+Походження
+- Вихідний код: офіційні репозиторії https://github.com/libimobiledevice
+  (libplist, libimobiledevice-glue, libusbmuxd, libimobiledevice).
+- Збірка для Windows: https://github.com/jrjr/libimobiledevice-windows
+  (автоматична збірка GitHub Actions, реліз v20261108-74585f8,
+  файл libimobile-suite-latest_w64.zip).
+- SHA-256 архіву: 61e3fd1cc5ded01695cc464f3de8a7bf706c340cad9f2e142c4aafa747bf1324
+
+Ліцензії
+- libimobiledevice, libplist, libusbmuxd, libimobiledevice-glue: GNU LGPL 2.1+
+  (утиліти командного рядка можуть бути під GPL 2+). Повні тексти та вихідний код:
+  https://github.com/libimobiledevice
+- OpenSSL 3: Apache License 2.0, https://www.openssl.org
+
+Reclaim запускає ці програми як окремі процеси й не змінює їх.
+Вони лише читають базову інформацію про iPhone і просять пристрій
+показати системне вікно «Довіряти цьому комп'ютеру».
+Для зв'язку з телефоном потрібен драйвер Apple Mobile Device
+(встановлюється з Apple Devices або iTunes).

@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="uk" data-theme="system">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reclaim — чесний помічник для власника iPhone</title>
+<meta name="description" content="Reclaim допомагає власнику iPhone відновити доступ до Apple ID і пристрою офіційними засобами Apple. Застосунок для Windows. Без обходу блокування активації.">
+<meta name="color-scheme" content="light dark">
+<script>
+  // Тема застосовується до відображення сторінки, щоб не було миготіння.
+  (function () { try { var t = localStorage.getItem('theme'); if (t === 'light' || t === 'dark' || t === 'system') document.documentElement.setAttribute('data-theme', t); } catch (e) {} })();
+</script>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23007AFF'/%3E%3Cpath d='M10 16.5l4 4 8-9' fill='none' stroke='white' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="styles.css">
+<script src="config.js"></script>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="#top"><span class="ico" style="--c:#007AFF"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7"/></svg></span>Reclaim</a>
+    <nav class="links" aria-label="Розділи">
+      <a href="#features">Можливості</a><a href="#limits">Межі</a><a href="#install">Встановлення</a><a href="#faq">Питання</a>
+    </nav>
+    <div class="seg" role="group" aria-label="Тема">
+      <button type="button" data-theme-set="system">Авто</button>
+      <button type="button" data-theme-set="light">Світла</button>
+      <button type="button" data-theme-set="dark">Темна</button>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero">
+    <div class="wrap">
+      <h1>Reclaim</h1>
+      <p class="lead">Чесний помічник для власника iPhone, який забув пароль або Apple ID. Крок за кроком веде офіційними шляхами Apple.</p>
+      <div class="btns">
+        <a class="btn" data-link="release" href="#"><svg viewBox="0 0 24 24"><path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 19h14"/></svg>Завантажити для Windows</a>
+        <a class="btn secondary" data-link="repo" href="#"><svg viewBox="0 0 24 24"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5"/></svg>Код на GitHub</a>
+      </div>
+      <p class="meta">Версія <span data-version></span> · Windows · безкоштовно</p>
+
+      <div class="mock" aria-hidden="true">
+        <div class="bar"><i></i><i></i><i></i></div>
+        <div class="body">
+          <div class="side"><span>Головна</span><span>Apple ID</span><span>Блокування активації</span><span class="on">Мій iPhone</span><span>Режим відновлення</span><span>Про застосунок</span></div>
+          <div class="main">
+            <h4>Мій iPhone</h4>
+            <div class="r"><span class="d">✓</span><div>Драйвер Apple встановлено<small>Служба працює</small></div></div>
+            <div class="r"><span class="d">✓</span><div>iPhone підключено<small>Модель, версія iOS, серійний номер, IMEI</small></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="features" class="alt">
+    <div class="wrap">
+      <div class="center"><div class="eyebrow">Що робить застосунок</div><h2>Усе потрібне в одному місці</h2><p class="lead">Сім розділів із простими поясненнями. Усі дії ведуть до офіційних інструментів Apple.</p></div>
+      <div class="grid">
+        <div class="card"><div class="ico" style="--c:#007AFF"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c1-4 4-6 8-6s7 2 8 6"/></svg></div><h3>Відновлення Apple ID</h3><p>Веде на офіційну сторінку iforgot.apple.com, де відновлюють доступ до облікового запису.</p></div>
+        <div class="card"><div class="ico" style="--c:#FF9500"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg></div><h3>Блокування активації</h3><p>Пояснює, що це за захист і як його знімає власник за допомогою Apple ID та пароля.</p></div>
+        <div class="card"><div class="ico" style="--c:#34C759"><svg viewBox="0 0 24 24"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M10 13h5M10 17h5"/></svg></div><h3>Докази власності</h3><p>Чек-лист того, що потрібно підтримці Apple, плюс серійний номер та IMEI, які можна зберегти як PDF-пакет.</p></div>
+        <div class="card"><div class="ico" style="--c:#5AC8FA"><svg viewBox="0 0 24 24"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg></div><h3>Інформація про iPhone</h3><p>Показує назву, модель, версію iOS, серійний номер та IMEI підключеного iPhone, а також перевіряє драйвер Apple.</p></div>
+        <div class="card"><div class="ico" style="--c:#AF52DE"><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1114 5.3M4 12V6M4 12h6"/></svg></div><h3>Скидання через режим відновлення</h3><p>Покроково пояснює, як перевести iPhone в режим відновлення; саме скидання виконує програма Apple, і дані на пристрої видаляються.</p></div>
+        <div class="card"><div class="ico" style="--c:#FF2D55"><svg viewBox="0 0 24 24"><path d="M5 12h12M13 7l5 5-5 5"/><path d="M5 5v14"/></svg></div><h3>Вихід із режиму відновлення</h3><p>Підказує кроки для різних моделей, якщо iPhone завис на екрані з кабелем і комп’ютером.</p></div>
+        <div class="card"><div class="ico" style="--c:#5856D6"><svg viewBox="0 0 24 24"><path d="M6 3h12M6 21h12M7 3c0 5 5 6 5 9s-5 4-5 9M17 3c0 5-5 6-5 9s5 4 5 9"/></svg></div><h3>Screen Time</h3><p>Показує офіційні способи змінити код-пароль Screen Time. Код не підбирається і не «ламається».</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="limits">
+    <div class="wrap">
+      <div class="center"><div class="eyebrow">Чого застосунок не робить</div><h2>Чесні межі</h2><p class="lead">Reclaim захищає власників, а не допомагає обійти захист чужих пристроїв.</p></div>
+      <div class="no">
+        <div class="card"><div class="x">✕</div><h3>Не обходить блокування активації</h3><p>Блокування активації — функція захисту від викрадення. Зняти її може лише власник облікового запису.</p></div>
+        <div class="card"><div class="x">✕</div><h3>Не знімає Apple ID без пароля власника</h3><p>Reclaim не пропонує жодних способів видалити чужий Apple ID. Доступ відновлюється тільки через Apple.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="install" class="alt">
+    <div class="wrap">
+      <div class="center"><div class="eyebrow">Встановлення</div><h2>Чотири кроки</h2></div>
+      <ol class="steps">
+        <li><b>Завантажте інсталятор</b><span>Відкрийте останній реліз на GitHub і завантажте файл для Windows.</span></li>
+        <li><b>Запустіть його</b><span>Інсталятор не підписаний, тому Windows SmartScreen може показати попередження.</span></li>
+        <li><b>Встановіть драйвер Apple</b><span>Потрібен застосунок Apple Devices із Microsoft Store або iTunes. Reclaim перевіряє це сам і пропонує відкрити офіційне встановлення; нічого не завантажується непомітно.</span></li>
+        <li><b>Підключіть iPhone</b><span>З’єднайте кабелем і натисніть «Довіряти» на екрані iPhone. Він з’явиться в розділі «Мій iPhone».</span></li>
+      </ol>
+      <div class="req"><span>Windows</span><span>Apple Devices або iTunes</span><span>USB-кабель</span></div>
+    </div>
+  </section>
+
+  <section id="faq">
+    <div class="wrap">
+      <div class="center"><div class="eyebrow">Часті питання</div><h2>Відповіді</h2></div>
+      <div class="faq">
+        <details><summary>Чи може Reclaim розблокувати чужий iPhone?</summary><p>Ні. Застосунок не обходить блокування активації і не знімає Apple ID без пароля власника.</p></details>
+        <details><summary>Навіщо потрібен драйвер Apple?</summary><p>Без служби Apple Mobile Device, яка входить до Apple Devices та iTunes, Windows не бачить iPhone, і розділ «Мій iPhone» буде порожнім.</p></details>
+        <details><summary>Чи завантажує Reclaim щось сам?</summary><p>Ні. Якщо драйвера немає, застосунок лише пропонує відкрити офіційне встановлення з Microsoft Store.</p></details>
+        <details><summary>Що станеться з даними під час скидання?</summary><p>Скидання через режим відновлення видаляє дані на iPhone. Його виконує програма Apple, а не Reclaim.</p></details>
+        <details><summary>Скільки триває відновлення Apple ID?</summary><p>Це визначає Apple. Іноді відновлення облікового запису займає кілька днів, тому доказами власності краще запастися заздалегідь.</p></details>
+        <details><summary>Куди потрапляють мої дані?</summary><p>Reclaim працює локально на вашому комп’ютері й відкриває лише офіційні сайти Apple та Microsoft Store.</p></details>
+        <details><summary>Чому Windows показує попередження під час встановлення?</summary><p>Інсталятор не підписаний цифровим підписом видавця, тому SmartScreen може попередити. Код відкритий, його можна перевірити на GitHub.</p></details>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div>
+      <p><b>Reclaim</b> · версія <span data-version></span></p>
+      <p>Apple, iPhone, iTunes та Apple ID є торговими марками Apple Inc. Reclaim — незалежний проєкт, не пов’язаний з Apple.</p>
+    </div>
+    <div>
+      <p><a data-link="notice" href="#">Ліцензії вбудованих утиліт</a> (libimobiledevice, OpenSSL)</p>
+      <p><a data-link="repo" href="#">GitHub</a></p>
+    </div>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
