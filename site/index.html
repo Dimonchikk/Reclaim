@@ -1,127 +1,337 @@
-<!doctype html>
-<html lang="uk" data-theme="system">
+<!DOCTYPE html>
+<html lang="uk">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Reclaim — чесний помічник для власника iPhone</title>
-<meta name="description" content="Reclaim допомагає власнику iPhone відновити доступ до Apple ID і пристрою офіційними засобами Apple. Застосунок для Windows. Без обходу блокування активації.">
-<meta name="color-scheme" content="light dark">
-<script>
-  // Тема застосовується до відображення сторінки, щоб не було миготіння.
-  (function () { try { var t = localStorage.getItem('theme'); if (t === 'light' || t === 'dark' || t === 'system') document.documentElement.setAttribute('data-theme', t); } catch (e) {} })();
-</script>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23007AFF'/%3E%3Cpath d='M10 16.5l4 4 8-9' fill='none' stroke='white' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
-<link rel="stylesheet" href="styles.css">
-<script src="config.js"></script>
+<meta name="description" content="Reclaim — застосунок для Windows: відновлення Apple ID, пояснення блокування активації, докази власності, інформація про iPhone. Тільки офіційні шляхи Apple.">
+<meta property="og:title" content="Reclaim">
+<meta property="og:description" content="Чесний помічник для власника iPhone, який забув пароль або Apple ID.">
+<meta property="og:image" content="screenshots/home.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23007AFF'/%3E%3Crect x='11' y='6' width='10' height='20' rx='2.6' fill='none' stroke='white' stroke-width='2'/%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#f5f5f7; --bg2:#ffffff; --card:#ffffff; --side:#eef0f3;
+  --ink:#1d1d1f; --ink2:#515154; --ink3:#86868b; --line:rgba(0,0,0,.08);
+  --blue:#0071e3; --blue2:#0a84ff; --green:#28a745; --orange:#f5a000; --red:#ff3b30; --purple:#af52de;
+  --shadow:0 1px 2px rgba(0,0,0,.04),0 8px 30px rgba(0,0,0,.06);
+  --glass:rgba(245,245,247,.72);
+  --radius:22px;
+}
+html[data-theme="dark"]{
+  --bg:#000000; --bg2:#0d0d0f; --card:#1c1c1e; --side:#161618;
+  --ink:#f5f5f7; --ink2:#c7c7cc; --ink3:#8e8e93; --line:rgba(255,255,255,.1);
+  --blue:#2997ff; --blue2:#0a84ff; --green:#30d158; --orange:#ffb340; --red:#ff453a; --purple:#bf5af2;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 40px rgba(0,0,0,.5);
+  --glass:rgba(22,22,24,.72);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:70px}
+body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI Variable Text","Segoe UI",Inter,Roboto,"Helvetica Neue",Arial,sans-serif;
+  background:var(--bg);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased;transition:background .3s,color .3s}
+a{color:var(--blue);text-decoration:none}
+a:hover{text-decoration:underline}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+
+/* ---------- верхня панель ---------- */
+.nav{position:sticky;top:0;z-index:50;background:var(--glass);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid var(--line)}
+.nav .wrap{display:flex;align-items:center;height:56px;gap:24px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:17px;color:var(--ink)}
+.brand:hover{text-decoration:none}
+.brand svg{width:28px;height:28px}
+.links{display:flex;gap:22px;margin-left:auto;font-size:14px}
+.links a{color:var(--ink2)}
+.links a:hover{color:var(--ink);text-decoration:none}
+.theme{display:flex;background:var(--side);border:1px solid var(--line);border-radius:999px;padding:3px;gap:2px}
+.theme button{width:30px;height:26px;border:0;border-radius:999px;background:transparent;color:var(--ink3);cursor:pointer;display:grid;place-items:center;transition:background .2s,color .2s}
+.theme button svg{width:15px;height:15px}
+.theme button[aria-pressed="true"]{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.theme button:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
+
+/* ---------- головний блок ---------- */
+.hero{text-align:center;padding:84px 0 40px}
+.logo{display:block;width:112px;height:112px;margin:0 auto 26px;filter:drop-shadow(0 12px 28px rgba(0,113,227,.35))}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--green);background:color-mix(in srgb,var(--green) 12%,transparent);padding:5px 12px;border-radius:999px;margin-bottom:18px}
+.eyebrow i{width:7px;height:7px;border-radius:50%;background:var(--green)}
+h1{font-size:clamp(44px,7vw,80px);line-height:1.04;letter-spacing:-.025em;font-weight:700}
+.tag{font-size:clamp(22px,3vw,30px);font-weight:600;letter-spacing:-.01em;margin-top:10px;
+  background:linear-gradient(90deg,var(--blue2),var(--purple));-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{max-width:640px;margin:18px auto 0;font-size:19px;color:var(--ink2)}
+.cta{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:32px}
+.btn{display:inline-flex;align-items:center;gap:9px;padding:13px 24px;border-radius:999px;font-size:17px;font-weight:500;transition:transform .15s,filter .15s,background .2s}
+.btn:hover{text-decoration:none;transform:translateY(-1px)}
+.btn.primary{background:var(--blue2);color:#fff}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.ghost{color:var(--blue);background:color-mix(in srgb,var(--blue) 10%,transparent)}
+.btn svg{width:18px;height:18px}
+.meta{margin-top:16px;font-size:13px;color:var(--ink3)}
+
+/* ---------- вікно програми ---------- */
+.shot{margin:48px auto 0;max-width:900px;border-radius:14px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.18),0 0 0 1px var(--line);background:var(--card)}
+html[data-theme="dark"] .shot{box-shadow:0 30px 80px rgba(0,0,0,.7),0 0 0 1px var(--line)}
+.bar{height:34px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;background:var(--side);border-bottom:1px solid var(--line);font-size:12px;color:var(--ink3)}
+.bar .ctl{display:flex;gap:14px;font-size:13px;color:var(--ink3)}
+.shot img{display:block;width:100%;height:auto}
+
+/* ---------- розділи ---------- */
+section{padding:88px 0 0}
+.head{text-align:center;max-width:680px;margin:0 auto 44px}
+h2{font-size:clamp(32px,4.4vw,48px);line-height:1.08;letter-spacing:-.02em;font-weight:700}
+.head p{margin-top:12px;font-size:19px;color:var(--ink2)}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:26px;box-shadow:var(--shadow);transition:transform .2s}
+.card:hover{transform:translateY(-3px)}
+.ic{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;margin-bottom:16px;color:var(--c);background:color-mix(in srgb,var(--c) 14%,transparent)}
+.ic svg{width:23px;height:23px}
+.card h3{font-size:19px;font-weight:600;letter-spacing:-.01em}
+.card p{margin-top:6px;color:var(--ink2);font-size:15px}
+
+/* велика картка-банер */
+.wide{display:grid;grid-template-columns:1.1fr 1fr;gap:0;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:28px;overflow:hidden;box-shadow:var(--shadow)}
+.wide .txt{padding:44px}
+.wide .txt h3{font-size:30px;letter-spacing:-.02em;line-height:1.15}
+.wide .txt p{margin-top:12px;color:var(--ink2);font-size:17px}
+.modes{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+.modes span{font-size:13px;padding:6px 12px;border-radius:999px;background:var(--side);color:var(--ink2);border:1px solid var(--line)}
+.modes span.on{background:var(--card);color:var(--green);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.wide .pic{background:linear-gradient(160deg,color-mix(in srgb,var(--blue2) 20%,var(--bg2)),var(--bg2));padding:34px 0 0 34px;align-self:stretch;display:flex;align-items:flex-end}
+.wide .pic img{width:100%;border-radius:12px 0 0 0;box-shadow:0 10px 40px rgba(0,0,0,.2);display:block}
+
+/* статистика */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:18px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow)}
+.stat b{display:block;font-size:34px;letter-spacing:-.02em;font-weight:700}
+.stat span{color:var(--ink3);font-size:14px}
+
+/* галерея */
+.tabs{display:flex;justify-content:center;margin:0 auto 26px;background:var(--side);border:1px solid var(--line);border-radius:999px;padding:4px;width:max-content;max-width:100%;overflow-x:auto}
+.tabs button{border:0;background:transparent;color:var(--ink2);font:inherit;font-size:14px;padding:8px 18px;border-radius:999px;cursor:pointer;white-space:nowrap}
+.tabs button[aria-selected="true"]{background:var(--card);color:var(--ink);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.14)}
+.cap{text-align:center;color:var(--ink2);margin-top:18px;font-size:15px;min-height:24px}
+.gallery .shot{margin-top:0}
+.gallery img{transition:opacity .25s}
+
+/* кроки */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;counter-reset:s}
+.step{position:relative;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:26px 26px 26px;box-shadow:var(--shadow)}
+.step::before{counter-increment:s;content:counter(s);display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--blue2);color:#fff;font-weight:700;margin-bottom:14px}
+.step h3{font-size:18px}
+.step p{color:var(--ink2);margin-top:6px;font-size:15px}
+.note{margin-top:18px;display:flex;gap:14px;align-items:flex-start;background:color-mix(in srgb,var(--orange) 10%,var(--card));border:1px solid color-mix(in srgb,var(--orange) 30%,transparent);border-radius:18px;padding:18px 22px;font-size:15px;color:var(--ink2)}
+.note svg{flex:none;width:22px;height:22px;color:var(--orange);margin-top:1px}
+.note b{color:var(--ink)}
+kbd{font-family:inherit;font-size:13px;background:var(--side);border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;padding:1px 6px;color:var(--ink)}
+
+/* питання */
+.faq{max-width:780px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+details{border-top:1px solid var(--line)}
+details:first-child{border-top:0}
+summary{list-style:none;cursor:pointer;padding:20px 26px;font-weight:600;font-size:17px;display:flex;justify-content:space-between;align-items:center;gap:16px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"";width:9px;height:9px;border-right:2px solid var(--ink3);border-bottom:2px solid var(--ink3);transform:rotate(45deg);transition:transform .2s;flex:none;margin-top:-4px}
+details[open] summary::after{transform:rotate(-135deg);margin-top:4px}
+details p{padding:0 26px 22px;color:var(--ink2);font-size:15px}
+
+/* завантаження */
+.get{margin-top:88px;text-align:center;background:var(--card);border:1px solid var(--line);border-radius:32px;padding:64px 24px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.get::before{content:"";position:absolute;inset:-40% -10% auto;height:120%;background:radial-gradient(closest-side,color-mix(in srgb,var(--blue2) 18%,transparent),transparent);pointer-events:none}
+.get > *{position:relative}
+.get .logo{width:80px;height:80px;margin-bottom:20px}
+
+footer{padding:56px 0 48px;color:var(--ink3);font-size:13px}
+footer .wrap{display:flex;flex-wrap:wrap;gap:12px 28px;justify-content:space-between;border-top:1px solid var(--line);padding-top:24px}
+footer a{color:var(--ink2)}
+
+.reveal{opacity:0;transform:translateY(18px);transition:opacity .7s ease,transform .7s ease}
+.reveal.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}}
+
+@media (max-width:860px){
+  .links{display:none}
+  .theme{margin-left:auto}
+  .wide{grid-template-columns:1fr}
+  .wide .txt{padding:30px}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .steps{grid-template-columns:1fr}
+  .hero{padding-top:56px}
+}
+</style>
 </head>
 <body>
 
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="rcbg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5AC8FA"/><stop offset="1" stop-color="#0A7AFF"/></linearGradient>
+    <symbol id="rc" viewBox="0 0 100 100">
+      <rect width="100" height="100" rx="23" fill="url(#rcbg)"/>
+      <rect x="32" y="18" width="36" height="64" rx="9" fill="none" stroke="#fff" stroke-width="6"/>
+      <path d="M43 72h14" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+      <path d="M41 46l7 7 12-14" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+  </defs>
+</svg>
+
 <header class="nav">
   <div class="wrap">
-    <a class="brand" href="#top"><span class="ico" style="--c:#007AFF"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7"/></svg></span>Reclaim</a>
-    <nav class="links" aria-label="Розділи">
-      <a href="#features">Можливості</a><a href="#limits">Межі</a><a href="#install">Встановлення</a><a href="#faq">Питання</a>
+    <a class="brand" href="#top"><svg viewBox="0 0 100 100"><use href="#rc"/></svg>Reclaim</a>
+    <nav class="links">
+      <a href="#features">Можливості</a>
+      <a href="#gallery">Знімки</a>
+      <a href="#limits">Межі</a>
+      <a href="#install">Встановлення</a>
+      <a href="#faq">Питання</a>
     </nav>
-    <div class="seg" role="group" aria-label="Тема">
-      <button type="button" data-theme-set="system">Авто</button>
-      <button type="button" data-theme-set="light">Світла</button>
-      <button type="button" data-theme-set="dark">Темна</button>
+    <div class="theme" role="group" aria-label="Тема">
+      <button data-t="light" title="Світла" aria-label="Світла тема"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></svg></button>
+      <button data-t="dark" title="Темна" aria-label="Темна тема"><svg viewBox="0 0 24 24"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z" fill="currentColor"/></svg></button>
     </div>
   </div>
 </header>
 
 <main id="top">
-  <section class="hero">
-    <div class="wrap">
+  <div class="wrap">
+
+    <div class="hero">
+      <svg class="logo" viewBox="0 0 100 100" aria-hidden="true"><use href="#rc"/></svg>
+      <div class="eyebrow"><i></i>Версія <span class="ver">0.2.0</span> · Windows</div>
       <h1>Reclaim</h1>
+      <div class="tag">Поверніть доступ чесним шляхом.</div>
       <p class="lead">Чесний помічник для власника iPhone, який забув пароль або Apple ID. Крок за кроком веде офіційними шляхами Apple.</p>
-      <div class="btns">
-        <a class="btn" data-link="release" href="#"><svg viewBox="0 0 24 24"><path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 19h14"/></svg>Завантажити для Windows</a>
-        <a class="btn secondary" data-link="repo" href="#"><svg viewBox="0 0 24 24"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5"/></svg>Код на GitHub</a>
+      <div class="cta">
+        <a class="btn primary dl" href="#install"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10.5l5 5 5-5M5 19.5h14"/></svg>Завантажити <span class="ver">0.2.0</span></a>
+        <a class="btn ghost repo" href="#install">Код на GitHub</a>
       </div>
-      <p class="meta">Версія <span data-version></span> · Windows · безкоштовно</p>
+      <div class="meta">Один інсталятор · без акаунтів · українською</div>
 
-      <div class="mock" aria-hidden="true">
-        <div class="bar"><i></i><i></i><i></i></div>
-        <div class="body">
-          <div class="side"><span>Головна</span><span>Apple ID</span><span>Блокування активації</span><span class="on">Мій iPhone</span><span>Режим відновлення</span><span>Про застосунок</span></div>
-          <div class="main">
-            <h4>Мій iPhone</h4>
-            <div class="r"><span class="d">✓</span><div>Драйвер Apple встановлено<small>Служба працює</small></div></div>
-            <div class="r"><span class="d">✓</span><div>iPhone підключено<small>Модель, версія iOS, серійний номер, IMEI</small></div></div>
-          </div>
+      <div class="shot">
+        <div class="bar"><span>Reclaim</span><span class="ctl"><span>—</span><span>☐</span><span>✕</span></span></div>
+        <img id="heroShot" class="themed" data-shot="home" src="screenshots/home.png" width="1620" height="1200" alt="Головне вікно Reclaim: відновлення Apple ID, блокування активації, скидання, Screen Time, інформація про iPhone">
+      </div>
+    </div>
+
+    <section id="features" class="reveal">
+      <div class="head">
+        <h2>Підключили — і видно все.</h2>
+        <p>Reclaim показує, що готово, а чого бракує, і лише пропонує офіційні кроки. Нічого не завантажується приховано.</p>
+      </div>
+      <div class="wide">
+        <div class="txt">
+          <h3>iPhone одразу в розділі «Мій iPhone».</h3>
+          <p>Утиліти libimobiledevice вбудовані, окремо ставити їх не треба. Застосунок перевіряє драйвер Apple і, якщо його немає, пропонує відкрити офіційне встановлення з Microsoft Store.</p>
+          <div class="modes"><span class="on">Драйвер Apple</span><span class="on">iPhone підключено</span><span class="on">Довіра до комп’ютера</span></div>
         </div>
+        <div class="pic"><img class="themed" data-shot="device" src="screenshots/device.png" alt="Розділ Мій iPhone: драйвер, підключення, довіра та інформація про пристрій"></div>
       </div>
-    </div>
-  </section>
+      <div class="stats">
+        <div class="stat"><b>9</b><span>екранів, кожен із простим поясненням</span></div>
+        <div class="stat"><b>3</b><span>теми: системна, світла, темна</span></div>
+        <div class="stat"><b>PDF</b><span>пакет доказів власності</span></div>
+        <div class="stat"><b>0</b><span>обходів захисту Apple</span></div>
+      </div>
+    </section>
 
-  <section id="features" class="alt">
-    <div class="wrap">
-      <div class="center"><div class="eyebrow">Що робить застосунок</div><h2>Усе потрібне в одному місці</h2><p class="lead">Сім розділів із простими поясненнями. Усі дії ведуть до офіційних інструментів Apple.</p></div>
+    <section class="reveal">
+      <div class="head">
+        <h2>Що робить застосунок.</h2>
+        <p>На кожному екрані написано, що режим робить і чого не робить.</p>
+      </div>
       <div class="grid">
-        <div class="card"><div class="ico" style="--c:#007AFF"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c1-4 4-6 8-6s7 2 8 6"/></svg></div><h3>Відновлення Apple ID</h3><p>Веде на офіційну сторінку iforgot.apple.com, де відновлюють доступ до облікового запису.</p></div>
-        <div class="card"><div class="ico" style="--c:#FF9500"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg></div><h3>Блокування активації</h3><p>Пояснює, що це за захист і як його знімає власник за допомогою Apple ID та пароля.</p></div>
-        <div class="card"><div class="ico" style="--c:#34C759"><svg viewBox="0 0 24 24"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M10 13h5M10 17h5"/></svg></div><h3>Докази власності</h3><p>Чек-лист того, що потрібно підтримці Apple, плюс серійний номер та IMEI, які можна зберегти як PDF-пакет.</p></div>
-        <div class="card"><div class="ico" style="--c:#5AC8FA"><svg viewBox="0 0 24 24"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg></div><h3>Інформація про iPhone</h3><p>Показує назву, модель, версію iOS, серійний номер та IMEI підключеного iPhone, а також перевіряє драйвер Apple.</p></div>
-        <div class="card"><div class="ico" style="--c:#AF52DE"><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1114 5.3M4 12V6M4 12h6"/></svg></div><h3>Скидання через режим відновлення</h3><p>Покроково пояснює, як перевести iPhone в режим відновлення; саме скидання виконує програма Apple, і дані на пристрої видаляються.</p></div>
-        <div class="card"><div class="ico" style="--c:#FF2D55"><svg viewBox="0 0 24 24"><path d="M5 12h12M13 7l5 5-5 5"/><path d="M5 5v14"/></svg></div><h3>Вихід із режиму відновлення</h3><p>Підказує кроки для різних моделей, якщо iPhone завис на екрані з кабелем і комп’ютером.</p></div>
-        <div class="card"><div class="ico" style="--c:#5856D6"><svg viewBox="0 0 24 24"><path d="M6 3h12M6 21h12M7 3c0 5 5 6 5 9s-5 4-5 9M17 3c0 5-5 6-5 9s5 4 5 9"/></svg></div><h3>Screen Time</h3><p>Показує офіційні способи змінити код-пароль Screen Time. Код не підбирається і не «ламається».</p></div>
+        <div class="card" style="--c:#0A84FF"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="3.3"/><path d="M5.5 19.5c.8-3.3 3.5-5.2 6.5-5.2s5.7 1.9 6.5 5.2"/></svg></div><h3>Відновлення Apple ID</h3><p>Веде на офіційну сторінку iforgot.apple.com, де відновлюють доступ до облікового запису.</p></div>
+        <div class="card" style="--c:#5856D6"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10.5" width="14" height="9.5" rx="2.2"/><path d="M8 10.5V8a4 4 0 018 0v2.5M12 14.6v1.8"/></svg></div><h3>Блокування активації</h3><p>Пояснює, що це за захист і як його знімає власник за допомогою Apple ID та пароля.</p></div>
+        <div class="card" style="--c:#34C759"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 3.5h7.2L18 7.8V19.5a1 1 0 01-1 1H6.5a1 1 0 01-1-1v-15a1 1 0 011-1z"/><path d="M13.5 3.5V8H18M8.7 14.3l2.1 2.1 4-4.2"/></svg></div><h3>Докази власності</h3><p>Чек-лист того, що потрібно підтримці Apple, плюс серійний номер та IMEI, які можна зберегти як PDF-пакет.</p></div>
+        <div class="card" style="--c:#32ADE6"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2.8" width="10" height="18.4" rx="2.6"/><path d="M10.5 5.7h3M11 18.2h2"/></svg></div><h3>Інформація про iPhone</h3><p>Назва, модель, версія iOS, серійний номер та IMEI підключеного iPhone. Утиліти вже вбудовані в застосунок.</p></div>
+        <div class="card" style="--c:#FF9500"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 11-2.6-5.9"/><path d="M20 4.5v4.2h-4.2"/></svg></div><h3>Скидання через режим відновлення</h3><p>Покрокові підказки для різних моделей. Саме скидання виконує програма Apple, і дані на пристрої видаляються.</p></div>
+        <div class="card" style="--c:#8E8E93"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 4.5H6A1.5 1.5 0 004.5 6v12A1.5 1.5 0 006 19.5h3.5M14.5 8l4 4-4 4M18.5 12h-9"/></svg></div><h3>Вихід із режиму відновлення</h3><p>Кроки для різних моделей, якщо iPhone завис на екрані з кабелем і комп’ютером.</p></div>
+        <div class="card" style="--c:#FF2D55"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4h10M7 20h10M8 4c0 4 4 5 4 8s-4 4-4 8M16 4c0 4-4 5-4 8s4 4 4 8"/></svg></div><h3>Screen Time</h3><p>Офіційні способи змінити код-пароль Screen Time. Код не підбирається і не «ламається».</p></div>
+        <div class="card" style="--c:#0A84FF"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v17"/><path d="M12 3.5a8.5 8.5 0 010 17z" fill="currentColor"/></svg></div><h3>Світла й темна тема</h3><p>Системна, світла або темна; вибір запам’ятовується.</p></div>
+        <div class="card" style="--c:#FF3B30"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13"/></svg></div><h3>Видалення в один клік</h3><p>У «Про застосунок» видно версію, а кнопка запускає стандартне видалення Windows.</p></div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <section id="limits">
-    <div class="wrap">
-      <div class="center"><div class="eyebrow">Чого застосунок не робить</div><h2>Чесні межі</h2><p class="lead">Reclaim захищає власників, а не допомагає обійти захист чужих пристроїв.</p></div>
-      <div class="no">
-        <div class="card"><div class="x">✕</div><h3>Не обходить блокування активації</h3><p>Блокування активації — функція захисту від викрадення. Зняти її може лише власник облікового запису.</p></div>
-        <div class="card"><div class="x">✕</div><h3>Не знімає Apple ID без пароля власника</h3><p>Reclaim не пропонує жодних способів видалити чужий Apple ID. Доступ відновлюється тільки через Apple.</p></div>
+    <section id="gallery" class="gallery reveal">
+      <div class="head">
+        <h2>Подивіться зблизька.</h2>
+        <p>Світла й темна тема, бічне меню з підрозділами, у стилі Apple.</p>
       </div>
-    </div>
-  </section>
+      <div class="tabs" role="tablist" aria-label="Знімки екрана">
+        <button role="tab" data-i="0" aria-selected="true">Головна</button>
+        <button role="tab" data-i="1" aria-selected="false">Мій iPhone</button>
+        <button role="tab" data-i="2" aria-selected="false">Докази</button>
+        <button role="tab" data-i="3" aria-selected="false">Активація</button>
+        <button role="tab" data-i="4" aria-selected="false">Скидання</button>
+        <button role="tab" data-i="5" aria-selected="false">Про застосунок</button>
+      </div>
+      <div class="shot">
+        <div class="bar"><span>Reclaim</span><span class="ctl"><span>—</span><span>☐</span><span>✕</span></span></div>
+        <img id="galImg" src="screenshots/home.png" width="1620" height="1200" alt="">
+      </div>
+      <p class="cap" id="galCap"></p>
+    </section>
 
-  <section id="install" class="alt">
-    <div class="wrap">
-      <div class="center"><div class="eyebrow">Встановлення</div><h2>Чотири кроки</h2></div>
-      <ol class="steps">
-        <li><b>Завантажте інсталятор</b><span>Відкрийте останній реліз на GitHub і завантажте файл для Windows.</span></li>
-        <li><b>Запустіть його</b><span>Інсталятор не підписаний, тому Windows SmartScreen може показати попередження.</span></li>
-        <li><b>Встановіть драйвер Apple</b><span>Потрібен застосунок Apple Devices із Microsoft Store або iTunes. Reclaim перевіряє це сам і пропонує відкрити офіційне встановлення; нічого не завантажується непомітно.</span></li>
-        <li><b>Підключіть iPhone</b><span>З’єднайте кабелем і натисніть «Довіряти» на екрані iPhone. Він з’явиться в розділі «Мій iPhone».</span></li>
-      </ol>
-      <div class="req"><span>Windows</span><span>Apple Devices або iTunes</span><span>USB-кабель</span></div>
-    </div>
-  </section>
+    <section id="limits" class="reveal">
+      <div class="head">
+        <h2>Чесні межі.</h2>
+        <p>Reclaim захищає власників, а не допомагає обійти захист чужих пристроїв.</p>
+      </div>
+      <div class="grid">
+        <div class="card" style="--c:var(--red)"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></div><h3>Не обходить блокування активації</h3><p>Це функція захисту від викрадення. Зняти її може лише власник облікового запису.</p></div>
+        <div class="card" style="--c:var(--red)"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></div><h3>Не знімає Apple ID без пароля власника</h3><p>Доступ відновлюється тільки офіційно, через Apple.</p></div>
+      </div>
+    </section>
 
-  <section id="faq">
-    <div class="wrap">
-      <div class="center"><div class="eyebrow">Часті питання</div><h2>Відповіді</h2></div>
+    <section id="install" class="reveal">
+      <div class="head">
+        <h2>Встановлення за хвилину.</h2>
+        <p>Windows і драйвер Apple. Решту застосунок перевірить сам.</p>
+      </div>
+      <div class="steps">
+        <div class="step"><h3>Завантажте</h3><p>Натисніть «Завантажити»: прийде файл <b>Reclaim-setup.exe</b>.</p></div>
+        <div class="step"><h3>Запустіть</h3><p>Інсталятор поставить застосунок, а у «Встановлених програмах» Windows з’явиться Reclaim.</p></div>
+        <div class="step"><h3>Підключіть iPhone</h3><p>Потрібен Apple Devices із Microsoft Store або iTunes. З’єднайте кабелем і натисніть «Довіряти» на екрані iPhone.</p></div>
+      </div>
+      <div class="note">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5M12 16.3v.2"/></svg>
+        <div>Якщо Windows покаже синє вікно <b>«Windows захистила ваш ПК»</b>, це перевірка SmartScreen: інсталятор ще не підписаний. Натисніть <b>«Докладніше»</b> → <b>«Все одно виконати»</b>.</div>
+      </div>
+    </section>
+
+    <section id="faq" class="reveal">
+      <div class="head"><h2>Питання й відповіді.</h2></div>
       <div class="faq">
         <details><summary>Чи може Reclaim розблокувати чужий iPhone?</summary><p>Ні. Застосунок не обходить блокування активації і не знімає Apple ID без пароля власника.</p></details>
         <details><summary>Навіщо потрібен драйвер Apple?</summary><p>Без служби Apple Mobile Device, яка входить до Apple Devices та iTunes, Windows не бачить iPhone, і розділ «Мій iPhone» буде порожнім.</p></details>
         <details><summary>Чи завантажує Reclaim щось сам?</summary><p>Ні. Якщо драйвера немає, застосунок лише пропонує відкрити офіційне встановлення з Microsoft Store.</p></details>
         <details><summary>Що станеться з даними під час скидання?</summary><p>Скидання через режим відновлення видаляє дані на iPhone. Його виконує програма Apple, а не Reclaim.</p></details>
-        <details><summary>Скільки триває відновлення Apple ID?</summary><p>Це визначає Apple. Іноді відновлення облікового запису займає кілька днів, тому доказами власності краще запастися заздалегідь.</p></details>
+        <details><summary>Скільки триває відновлення Apple ID?</summary><p>Це визначає Apple. Іноді відновлення облікового запису займає кілька днів, тому докази власності краще підготувати заздалегідь.</p></details>
         <details><summary>Куди потрапляють мої дані?</summary><p>Reclaim працює локально на вашому комп’ютері й відкриває лише офіційні сайти Apple та Microsoft Store.</p></details>
-        <details><summary>Чому Windows показує попередження під час встановлення?</summary><p>Інсталятор не підписаний цифровим підписом видавця, тому SmartScreen може попередити. Код відкритий, його можна перевірити на GitHub.</p></details>
+        <details><summary>Це відкритий код?</summary><p>Так, увесь код лежить у <a class="repo" href="#">репозиторії на GitHub</a>, а інсталятор збирає GitHub Actions із цього коду.</p></details>
+        <details><summary>Як видалити застосунок?</summary><p>Через <b>Параметри → Програми → Reclaim → Видалити</b> або кнопкою в розділі «Про застосунок».</p></details>
+      </div>
+    </section>
+
+    <div class="get reveal">
+      <svg class="logo" viewBox="0 0 100 100" aria-hidden="true"><use href="#rc"/></svg>
+      <h2>Поверніть доступ до свого iPhone.</h2>
+      <p class="lead">Версія <span class="ver">0.2.0</span> для Windows.</p>
+      <div class="cta">
+        <a class="btn primary dl" href="#install"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10.5l5 5 5-5M5 19.5h14"/></svg>Завантажити <span class="ver">0.2.0</span></a>
+        <a class="btn ghost rel" href="#install">Усі версії</a>
+        <a class="btn ghost repo" href="#install">Код на GitHub</a>
       </div>
     </div>
-  </section>
+  </div>
 </main>
 
 <footer>
   <div class="wrap">
-    <div>
-      <p><b>Reclaim</b> · версія <span data-version></span></p>
-      <p>Apple, iPhone, iTunes та Apple ID є торговими марками Apple Inc. Reclaim — незалежний проєкт, не пов’язаний з Apple.</p>
-    </div>
-    <div>
-      <p><a data-link="notice" href="#">Ліцензії вбудованих утиліт</a> (libimobiledevice, OpenSSL)</p>
-      <p><a data-link="repo" href="#">GitHub</a></p>
-    </div>
+    <span>© 2026 Дмитро Бричнік · Reclaim <span class="ver">0.2.0</span> · <a class="repo" href="#">Код на GitHub</a></span>
+    <span>Вбудовані утиліти: libimobiledevice, OpenSSL · <a class="notice" href="#">ліцензії</a></span>
+    <span>Apple, iPhone, iTunes та Apple ID є торговими марками Apple Inc. Reclaim не пов’язаний з Apple.</span>
   </div>
 </footer>
 
+<script src="config.js"></script>
 <script src="script.js"></script>
 </body>
 </html>

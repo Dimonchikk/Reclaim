@@ -27,7 +27,7 @@ npm run dist
 Windows і драйвер Apple (служба Apple Mobile Device Service) з застосунку Apple Devices (Microsoft Store) або iTunes. Застосунок перевіряє це сам і лише пропонує відкрити офіційне встановлення, нічого не завантажуючи приховано. Утиліти libimobiledevice вбудовані в `bin/`; походження й ліцензії: [`bin/NOTICE.txt`](bin/NOTICE.txt).
 
 ## Сайт (GitHub Pages)
-Папка `site/` — чистий HTML, CSS і JS без збірки. Посилання на репозиторій і версію задаються в одному місці: `site/config.js`. На GitHub Pages власник і назва репозиторію визначаються з адреси автоматично.
+Папка `site/` — чистий HTML, CSS і JS без збірки. Репозиторій, назва файлу інсталятора й версія задаються в одному місці: `site/config.js`. На GitHub Pages репозиторій визначається з адреси автоматично, а кнопка «Завантажити» веде прямо на `releases/latest/download/Reclaim-setup.exe`; номер версії сайт бере з останнього релізу. Знімки застосунку лежать у `site/screenshots/` (світлі й `-dark`).
 
 Увімкнення: **Settings → Pages → Source: GitHub Actions**. Далі сайт публікує `.github/workflows/pages.yml` після кожного пушу в `main`, що змінює `site/`.
 
