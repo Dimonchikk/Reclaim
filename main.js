@@ -2,7 +2,7 @@
 // Застосунок нічого не обходить: він відкриває офіційні сторінки Apple,
 // читає базову інформацію про iPhone вбудованими утилітами libimobiledevice
 // і просить пристрій показати системне вікно «Довіряти цьому комп'ютеру».
-const { app, BrowserWindow, ipcMain, shell, dialog } = require('electron');
+const { app, BrowserWindow, ipcMain, shell, dialog, net: electronNet } = require('electron');
 const { execFile, spawn } = require('child_process');
 const net = require('net');
 const path = require('path');
@@ -20,6 +20,7 @@ const ALLOWED_HOSTS = [
 ];
 const APPLE_DEVICES_STORE_ID = '9NP83LWLPZ9K'; // «Apple Devices» від Apple у Microsoft Store
 const APPLE_SERVICE = 'Apple Mobile Device Service';
+const REPO = 'Dimonchikk/Reclaim'; // репозиторій, у якому виходять нові версії
 
 // Вбудовані утиліти: поруч із кодом (розробка) або в resources/bin (зібраний застосунок).
 const BIN_DIR = app.isPackaged ? path.join(process.resourcesPath, 'bin') : path.join(__dirname, 'bin');
@@ -43,6 +44,7 @@ function createWindow() {
     minHeight: 640,
     backgroundColor: '#F5F5F7',
     title: 'Reclaim',
+    icon: path.join(__dirname, 'src', 'icon.png'),
     autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
@@ -125,17 +127,16 @@ ipcMain.handle('device-status', async () => {
       const i = line.indexOf(':');
       if (i > 0) map[line.slice(0, i).trim()] = line.slice(i + 1).trim();
     });
-    return {
-      state: 'ready', driver, tools, count: udids.length,
-      info: {
-        name: map.DeviceName || '',
-        model: map.ProductType || '',
-        ios: map.ProductVersion || '',
-        serial: map.SerialNumber || '',
-        imei: map.InternationalMobileEquipmentIdentity || '',
-        activation: map.ActivationState || '',
-      },
+    const info = {
+      name: map.DeviceName || '',
+      model: map.ProductType || '',
+      ios: map.ProductVersion || '',
+      serial: map.SerialNumber || '',
+      imei: map.InternationalMobileEquipmentIdentity || '',
+      activation: map.ActivationState || '',
     };
+    recordDevice(info);
+    return { state: 'ready', driver, tools, count: udids.length, info };
   }
   const text = (r.err + ' ' + r.out).trim();
   const detail = text.slice(0, 300);
@@ -160,6 +161,103 @@ ipcMain.handle('open-apple-devices', async () => {
     shell.openExternal('https://apps.microsoft.com/detail/' + APPLE_DEVICES_STORE_ID.toLowerCase());
   }
   return true;
+});
+
+// ---------- Історія підключених iPhone (лише локально, у папці даних застосунку) ----------
+const HISTORY_LIMIT = 50;
+const histFile = () => path.join(app.getPath('userData'), 'iphones.json');
+function readHistory() {
+  try {
+    const a = JSON.parse(fs.readFileSync(histFile(), 'utf8'));
+    return Array.isArray(a) ? a : [];
+  } catch (_) { return []; }
+}
+function writeHistory(list) {
+  try {
+    fs.mkdirSync(path.dirname(histFile()), { recursive: true });
+    fs.writeFileSync(histFile(), JSON.stringify(list.slice(0, HISTORY_LIMIT), null, 2));
+  } catch (_) {}
+}
+// Запис без дублікатів: той самий серійний номер (або IMEI) лише оновлює дату й версію iOS.
+function recordDevice(i) {
+  const key = i.serial || i.imei;
+  if (!key) return;
+  const list = readHistory();
+  const today = new Date().toISOString();
+  const ex = list.find((x) => (x.serial || x.imei) === key);
+  if (!ex) {
+    list.unshift({ name: i.name, model: i.model, ios: i.ios, serial: i.serial, imei: i.imei, firstSeen: today, lastSeen: today });
+    return writeHistory(list);
+  }
+  const changed = ex.lastSeen.slice(0, 10) !== today.slice(0, 10) || ex.ios !== i.ios || ex.name !== i.name || (!ex.imei && i.imei);
+  if (!changed) return;
+  Object.assign(ex, { name: i.name || ex.name, model: i.model || ex.model, ios: i.ios || ex.ios, imei: i.imei || ex.imei, lastSeen: today });
+  writeHistory(list);
+}
+ipcMain.handle('history-list', () => readHistory());
+ipcMain.handle('history-clear', async (e) => {
+  const win = BrowserWindow.fromWebContents(e.sender);
+  const { response } = await dialog.showMessageBox(win, {
+    type: 'question',
+    buttons: ['Очистити', 'Скасувати'],
+    defaultId: 1,
+    cancelId: 1,
+    title: 'Історія iPhone',
+    message: 'Очистити історію підключених iPhone?',
+    detail: 'Видалиться список на цьому комп’ютері. На самих телефонах нічого не зміниться.',
+  });
+  if (response !== 0) return { ok: false };
+  writeHistory([]);
+  return { ok: true };
+});
+
+// ---------- Перевірка оновлень ----------
+// Запитує в GitHub лише номер останнього опублікованого релізу. Нічого не завантажує й не встановлює.
+function cmpVer(a, b) {
+  const pa = String(a).split('.').map((n) => parseInt(n, 10) || 0);
+  const pb = String(b).split('.').map((n) => parseInt(n, 10) || 0);
+  for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+    const d = (pa[i] || 0) - (pb[i] || 0);
+    if (d) return d;
+  }
+  return 0;
+}
+ipcMain.handle('check-update', async () => {
+  const current = app.getVersion();
+  try {
+    const res = await electronNet.fetch(`https://api.github.com/repos/${REPO}/releases/latest`, {
+      headers: { Accept: 'application/vnd.github+json', 'User-Agent': 'Reclaim' },
+    });
+    if (res.status === 404) return { ok: true, current, latest: null, newer: false }; // релізів ще немає
+    if (!res.ok) return { ok: false, current, error: 'HTTP ' + res.status };
+    const j = await res.json();
+    const latest = String(j.tag_name || '').replace(/^v/i, '');
+    if (!/^\d+(\.\d+)*$/.test(latest)) return { ok: false, current, error: 'bad-tag' };
+    return { ok: true, current, latest, newer: cmpVer(latest, current) > 0 };
+  } catch (_) {
+    return { ok: false, current, error: 'offline' };
+  }
+});
+// Сторінку релізу відкриває сам застосунок за власною адресою, а не за адресою від сторінки.
+ipcMain.handle('open-release', () => {
+  shell.openExternal(`https://github.com/${REPO}/releases/latest`);
+  return true;
+});
+
+// ---------- Журнал змін (CHANGES.md: кожна версія — розділ «## номер») ----------
+ipcMain.handle('changelog', () => {
+  try {
+    const text = fs.readFileSync(path.join(__dirname, 'CHANGES.md'), 'utf8');
+    const out = [];
+    let cur = null;
+    text.split(/\r?\n/).forEach((line) => {
+      const h = line.match(/^##\s+(\d+(?:\.\d+)*)\s*$/);
+      if (h) { cur = { version: h[1], items: [] }; out.push(cur); return; }
+      const li = line.match(/^[-*]\s+(.*)$/);
+      if (cur && li) cur.items.push(li[1]);
+    });
+    return out;
+  } catch (_) { return []; }
 });
 
 // ---------- Версія та видалення ----------

@@ -8,7 +8,7 @@
 <meta property="og:title" content="Reclaim">
 <meta property="og:description" content="Чесний помічник для власника iPhone, який забув пароль або Apple ID.">
 <meta property="og:image" content="screenshots/home.png">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23007AFF'/%3E%3Crect x='11' y='6' width='10' height='20' rx='2.6' fill='none' stroke='white' stroke-width='2'/%3E%3C/svg%3E">
+<link rel="icon" type="image/png" href="icon.png">
 <style>
 :root{
   --bg:#f5f5f7; --bg2:#ffffff; --card:#ffffff; --side:#eef0f3;
@@ -194,12 +194,12 @@ footer a{color:var(--ink2)}
 
     <div class="hero">
       <svg class="logo" viewBox="0 0 100 100" aria-hidden="true"><use href="#rc"/></svg>
-      <div class="eyebrow"><i></i>Версія <span class="ver">0.2.0</span> · Windows</div>
+      <div class="eyebrow"><i></i>Версія <span class="ver">0.3.0</span> · Windows</div>
       <h1>Reclaim</h1>
       <div class="tag">Поверніть доступ чесним шляхом.</div>
       <p class="lead">Чесний помічник для власника iPhone, який забув пароль або Apple ID. Крок за кроком веде офіційними шляхами Apple.</p>
       <div class="cta">
-        <a class="btn primary dl" href="#install"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10.5l5 5 5-5M5 19.5h14"/></svg>Завантажити <span class="ver">0.2.0</span></a>
+        <a class="btn primary dl" href="#install"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10.5l5 5 5-5M5 19.5h14"/></svg>Завантажити <span class="ver">0.3.0</span></a>
         <a class="btn ghost repo" href="#install">Код на GitHub</a>
       </div>
       <div class="meta">Один інсталятор · без акаунтів · українською</div>
@@ -246,6 +246,10 @@ footer a{color:var(--ink2)}
         <div class="card" style="--c:#FF2D55"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4h10M7 20h10M8 4c0 4 4 5 4 8s-4 4-4 8M16 4c0 4-4 5-4 8s4 4 4 8"/></svg></div><h3>Screen Time</h3><p>Офіційні способи змінити код-пароль Screen Time. Код не підбирається і не «ламається».</p></div>
         <div class="card" style="--c:#0A84FF"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v17"/><path d="M12 3.5a8.5 8.5 0 010 17z" fill="currentColor"/></svg></div><h3>Світла й темна тема</h3><p>Системна, світла або темна; вибір запам’ятовується.</p></div>
         <div class="card" style="--c:#FF3B30"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13"/></svg></div><h3>Видалення в один клік</h3><p>У «Про застосунок» видно версію, а кнопка запускає стандартне видалення Windows.</p></div>
+      
+        <div class="card" style="--c:#0A84FF"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 10-2.3 5.7"/><path d="M20 5v6h-6"/></svg></div><h3>Перевірка оновлень</h3><p>Раз на годину питає GitHub лише про номер останньої версії. Якщо вона нова, з’являється кнопка «Оновити», що відкриває сторінку релізу. Нічого не встановлюється саме.</p></div>
+        <div class="card" style="--c:#32ADE6"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2.8" width="10" height="18.4" rx="2.6"/><path d="M10.5 5.7h3M11 18.2h2"/></svg></div><h3>Історія iPhone</h3><p>Підключені iPhone зберігаються лише на вашому комп’ютері: модель, серійний номер, IMEI, дата. Є копіювання, додавання до доказів і очищення.</p></div>
+        <div class="card" style="--c:#34C759"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 3.5h7.2L18 7.8V19.5a1 1 0 01-1 1H6.5a1 1 0 01-1-1v-15a1 1 0 011-1z"/><path d="M9 12h6M9 16h6"/></svg></div><h3>Журнал змін</h3><p>У «Про застосунок» видно, що нового в кожній версії.</p></div>
       </div>
     </section>
 
@@ -304,8 +308,9 @@ footer a{color:var(--ink2)}
         <details><summary>Чи завантажує Reclaim щось сам?</summary><p>Ні. Якщо драйвера немає, застосунок лише пропонує відкрити офіційне встановлення з Microsoft Store.</p></details>
         <details><summary>Що станеться з даними під час скидання?</summary><p>Скидання через режим відновлення видаляє дані на iPhone. Його виконує програма Apple, а не Reclaim.</p></details>
         <details><summary>Скільки триває відновлення Apple ID?</summary><p>Це визначає Apple. Іноді відновлення облікового запису займає кілька днів, тому докази власності краще підготувати заздалегідь.</p></details>
-        <details><summary>Куди потрапляють мої дані?</summary><p>Reclaim працює локально на вашому комп’ютері й відкриває лише офіційні сайти Apple та Microsoft Store.</p></details>
+        <details><summary>Куди потрапляють мої дані?</summary><p>Reclaim працює локально на вашому комп’ютері й відкриває лише офіційні сайти Apple та Microsoft Store. Єдиний мережевий запит застосунок робить до GitHub: раз на годину питає номер останньої версії. Історія iPhone лежить лише на вашому комп’ютері й нікуди не надсилається.</p></details>
         <details><summary>Це відкритий код?</summary><p>Так, увесь код лежить у <a class="repo" href="#">репозиторії на GitHub</a>, а інсталятор збирає GitHub Actions із цього коду.</p></details>
+        <details><summary>Як оновити застосунок?</summary><p>Коли вийде нова версія, на головній і в «Про застосунок» з’явиться кнопка «Оновити»: вона відкриє сторінку релізу. Завантажте новий інсталятор і запустіть його. Нічого не встановлюється без вашої дії.</p></details>
         <details><summary>Як видалити застосунок?</summary><p>Через <b>Параметри → Програми → Reclaim → Видалити</b> або кнопкою в розділі «Про застосунок».</p></details>
       </div>
     </section>
@@ -313,9 +318,9 @@ footer a{color:var(--ink2)}
     <div class="get reveal">
       <svg class="logo" viewBox="0 0 100 100" aria-hidden="true"><use href="#rc"/></svg>
       <h2>Поверніть доступ до свого iPhone.</h2>
-      <p class="lead">Версія <span class="ver">0.2.0</span> для Windows.</p>
+      <p class="lead">Версія <span class="ver">0.3.0</span> для Windows.</p>
       <div class="cta">
-        <a class="btn primary dl" href="#install"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10.5l5 5 5-5M5 19.5h14"/></svg>Завантажити <span class="ver">0.2.0</span></a>
+        <a class="btn primary dl" href="#install"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10.5l5 5 5-5M5 19.5h14"/></svg>Завантажити <span class="ver">0.3.0</span></a>
         <a class="btn ghost rel" href="#install">Усі версії</a>
         <a class="btn ghost repo" href="#install">Код на GitHub</a>
       </div>
@@ -325,7 +330,7 @@ footer a{color:var(--ink2)}
 
 <footer>
   <div class="wrap">
-    <span>© 2026 Дмитро Бричнік · Reclaim <span class="ver">0.2.0</span> · <a class="repo" href="#">Код на GitHub</a></span>
+    <span>© 2026 Дмитро Бричнік · Reclaim <span class="ver">0.3.0</span> · <a class="repo" href="#">Код на GitHub</a></span>
     <span>Вбудовані утиліти: libimobiledevice, OpenSSL · <a class="notice" href="#">ліцензії</a></span>
     <span>Apple, iPhone, iTunes та Apple ID є торговими марками Apple Inc. Reclaim не пов’язаний з Apple.</span>
   </div>

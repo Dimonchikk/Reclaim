@@ -70,7 +70,7 @@
       doesnt: ['Не надсилає ваші дані нікуди: усе лишається на цьому комп’ютері', 'Не гарантує, що Apple підтвердить власність'],
     },
     device: {
-      does: ['Показує назву, модель, версію iOS, серійний номер та IMEI iPhone', 'Перевіряє драйвер Apple і підказує, що зробити, якщо щось не так'],
+      does: ['Показує назву, модель, версію iOS, серійний номер та IMEI iPhone', 'Запам’ятовує підключені iPhone в історії лише на цьому комп’ютері', 'Перевіряє драйвер Apple і підказує, що зробити, якщо щось не так'],
       doesnt: ['Нічого не змінює на телефоні', 'Не обходить запит довіри: підтвердити його можете лише ви на екрані iPhone'],
     },
     reset: {
@@ -116,6 +116,7 @@
     { id: 'home', nav: 'Головна', sub: 'З чого почати', icon: 'home', render: () => `
       <h1>Чим допомогти?</h1>
       <p class="lead">Оберіть, що сталося. Ми проведемо вас офіційним шляхом Apple, крок за кроком.</p>
+      <div id="updBox"></div>
       <div id="homeBanner"></div>
       <div class="grid">
         <button class="tile" data-go="appleid">${ico('key', true)}<b>Забув пароль Apple ID</b><span>Покрокове відновлення на iforgot.apple.com</span></button>
@@ -125,7 +126,7 @@
         <button class="tile wide" data-go="device">${ico('phone', true)}<div><b>Переглянути інформацію про iPhone</b><span>Модель, версія iOS, серійний номер, IMEI. Підключіть телефон кабелем.</span></div></button>
       </div>
       <p class="small" style="margin-top:24px">Reclaim не обходить захист Apple. Він допомагає власнику повернути доступ законно.</p>`,
-      after: initHome },
+      after: () => { renderUpdate(); initHome(); } },
 
     { id: 'appleid', nav: 'Відновлення Apple ID', sub: 'Забули пароль чи пошту', icon: 'key', render: () => `
       <h1>Відновлення Apple ID</h1>
@@ -175,7 +176,8 @@
       <p class="lead">Підключіть iPhone кабелем. Reclaim покаже, що готово, а чого бракує.</p>
       ${modes('device')}
       <div id="devBody"></div>
-      <div class="row"><button class="btn secondary" id="devRefresh">Оновити</button></div>`, after: initDevice },
+      <div class="row"><button class="btn secondary" id="devRefresh">Оновити</button></div>
+      <div id="histBox"></div>`, after: initDevice },
 
     { id: 'reset', nav: 'Скидання через режим відновлення', sub: 'Забули пароль екрана', icon: 'reset', render: () => `
       <h1>Скидання через режим відновлення</h1>
@@ -221,6 +223,11 @@
         <div class="k">Вбудовані утиліти</div><div class="v" id="abTools">…</div><div></div>
         <div class="k">Драйвер Apple</div><div class="v" id="abDrv">…</div><div></div>
       </div></div>
+      <div class="card"><h3>Оновлення</h3>
+        <p id="abUpd" class="small">Перевіряю…</p>
+        <p class="small">Reclaim питає GitHub лише про номер останньої версії: під час запуску й раз на годину. Нічого не завантажується й не встановлюється без вашої дії.</p>
+        <div class="row" id="abUpdRow"><button class="btn secondary" id="abCheck">Шукати оновлення</button></div></div>
+      <div class="card"><h3>Що нового</h3><div id="abLog" class="small">…</div></div>
       <div class="card info"><h3>Що Reclaim не робить</h3>
         <ul class="plain"><li>Не обходить блокування активації.</li><li>Не знімає Apple ID без пароля власника.</li></ul>
         <p>Усі кроки ведуть до офіційних інструментів Apple: iforgot.apple.com, Apple Devices або iTunes, налаштувань iPhone та підтримки Apple.</p></div>
@@ -395,8 +402,10 @@
       if (sig === last) return;
       last = sig;
       body.innerHTML = renderDevice(s);
+      if (s.state === 'ready') renderHistory(); // щойно прочитаний iPhone потрапив в історію
     }
     devRefresh = refresh;
+    renderHistory();
     $('#devRefresh').addEventListener('click', () => refresh(true));
     refresh(true);
     timer = setInterval(() => refresh(false), 3000);
@@ -410,6 +419,13 @@
     $('#abVer').textContent = info.version + (info.packaged ? '' : ' (запуск із папки)');
     $('#abTools').textContent = info.tools ? 'Знайдено (libimobiledevice)' : 'Не знайдено';
     $('#abDrv').textContent = !d.installed ? 'Не встановлено' : d.running ? 'Працює' : 'Службу зупинено';
+    renderUpdate();
+    const log = await window.api.changelog();
+    if ($('#abLog')) {
+      $('#abLog').innerHTML = log.length
+        ? log.map((v) => `<h4 style="margin:12px 0 4px;color:var(--text)">Версія ${esc(v.version)}${v.version === info.version ? ' (поточна)' : ''}</h4><ul class="plain">${v.items.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>`).join('')
+        : 'Журнал змін недоступний.';
+    }
     $('#uninstall').addEventListener('click', async () => {
       const r = await window.api.uninstall();
       if (r.mode === 'settings') toast('Відкрито «Встановлені програми» Windows: оберіть Reclaim');
@@ -417,6 +433,81 @@
     });
   }
 
+  // ---------- Перевірка оновлень ----------
+  let updState = null;
+  async function checkUpdate() {
+    try { updState = await window.api.checkUpdate(); } catch (_) { updState = { ok: false }; }
+    renderUpdate();
+    return updState;
+  }
+  function renderUpdate() {
+    const u = updState;
+    const home = $('#updBox');
+    if (home) {
+      home.innerHTML = u && u.ok && u.newer
+        ? `<div class="card banner"><div><b>Вийшла нова версія ${esc(u.latest)}</b><br><span class="small">У вас ${esc(u.current)}. Відкриється сторінка завантаження, нічого не встановиться саме.</span></div>
+           <div class="row" style="margin:0"><button class="btn" data-release="1">Оновити до ${esc(u.latest)}</button></div></div>` : '';
+    }
+    const ab = $('#abUpd');
+    if (ab) {
+      ab.textContent = !u ? 'Перевіряю…'
+        : !u.ok ? 'Не вдалося перевірити (немає інтернету або GitHub не відповів).'
+        : u.newer ? `Доступна версія ${u.latest}. У вас ${u.current}.`
+        : u.latest ? `У вас остання версія (${u.current}).`
+        : 'Опублікованих версій ще немає.';
+      const row = $('#abUpdRow');
+      if (row) row.innerHTML = (u && u.ok && u.newer ? `<button class="btn" data-release="1">Оновити до ${esc(u.latest)}</button>` : '')
+        + '<button class="btn secondary" id="abCheck">Шукати оновлення</button>';
+      const c = $('#abCheck');
+      if (c) c.addEventListener('click', async () => {
+        c.disabled = true; await checkUpdate();
+        const s = updState;
+        if (s && s.ok && !s.newer) toast('У вас остання версія'); else if (s && !s.ok) toast('Не вдалося перевірити оновлення');
+      });
+    }
+  }
+
+  // ---------- Історія підключених iPhone ----------
+  const fmtDate = (iso) => { try { return new Date(iso).toLocaleDateString('uk-UA'); } catch (_) { return ''; } };
+  let histCache = [];
+  async function renderHistory() {
+    const box = $('#histBox');
+    if (!box) return;
+    histCache = await window.api.historyList();
+    if (!$('#histBox')) return;
+    if (!histCache.length) {
+      box.innerHTML = `<div class="card"><h3>Історія iPhone</h3><p class="small">Тут з’являться iPhone, які ви підключали. Список зберігається лише на цьому комп’ютері й нікуди не надсилається.</p></div>`;
+      return;
+    }
+    box.innerHTML = `<div class="card"><h3>Історія iPhone</h3>
+      <p class="small">Зберігається лише на цьому комп’ютері й нікуди не надсилається.</p>
+      ${histCache.map((h, i) => `<div class="kv" style="margin-top:12px">
+        <div class="k">Пристрій</div><div class="v">${esc(h.name || 'iPhone')} · ${esc(modelName(h.model))}</div><div></div>
+        <div class="k">Серійний номер</div><div class="v">${esc(h.serial || '—')}</div><div>${h.serial ? `<button class="btn secondary small" data-copy="${esc(h.serial)}">Копіювати</button>` : ''}</div>
+        <div class="k">IMEI</div><div class="v">${esc(h.imei || '—')}</div><div>${h.imei ? `<button class="btn secondary small" data-copy="${esc(h.imei)}">Копіювати</button>` : ''}</div>
+        <div class="k">Востаннє підключено</div><div class="v">${esc(fmtDate(h.lastSeen))}</div><div><button class="btn secondary small" data-hist-proof="${i}">Додати до доказів власності</button></div>
+      </div>`).join('')}
+      <div class="row"><button class="btn danger" id="histClear">Очистити історію…</button></div></div>`;
+    $('#histClear').addEventListener('click', async () => {
+      const r = await window.api.historyClear();
+      if (r && r.ok) { toast('Історію очищено'); renderHistory(); }
+    });
+  }
+
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('[data-release]')) return window.api.openRelease();
+    const hp = e.target.closest('[data-hist-proof]');
+    if (hp) {
+      const h = histCache[+hp.dataset.histProof]; if (!h) return;
+      const cur = store.get();
+      store.set({ done: cur.done || {}, serial: h.serial || '', imei: h.imei || '' });
+      toast('Номери додано до доказів власності');
+      go('proof');
+    }
+  });
+
   buildSidebar();
   go('home');
+  checkUpdate();
+  setInterval(checkUpdate, 60 * 60 * 1000); // далі раз на годину
 })();
