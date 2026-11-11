@@ -1,7 +1,7 @@
 {
   "name": "reclaim",
   "productName": "Reclaim",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Чесний помічник для власника iPhone: офіційне відновлення Apple ID та доступу до пристрою",
   "main": "main.js",
   "scripts": {

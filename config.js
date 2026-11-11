@@ -4,5 +4,5 @@
 window.RECLAIM = {
   repo: 'Dimonchikk/Reclaim',
   setup: 'Reclaim-setup.exe', // назва файлу інсталятора в релізі
-  version: '0.3.0',           // показується, доки не відповів GitHub
+  version: '0.3.1',           // показується, доки не відповів GitHub
 };
