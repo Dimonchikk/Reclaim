@@ -18,7 +18,7 @@ Windows-застосунок у стилі Apple, який крок за кро�
 ### [⬇️ Завантажити останній реліз](../../releases/latest/download/Reclaim-setup.exe) · [Можливості](#що-вміє) · [Запуск](#запуск-з-вихідного-коду) · [Збірка](#збірка-встановлювача) · [Сайт](https://dimonchikk.github.io/Reclaim/)
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="screenshots/home-dark.png">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Dimonchikk/Reclaim/main/screenshots/home-dark.png">
   <img src="screenshots/home.png" width="760" alt="Головний екран Reclaim">
 </picture>
 
@@ -49,8 +49,8 @@ Windows-застосунок у стилі Apple, який крок за кро�
 
 | | |
 |:---:|:---:|
-| <picture><source media="(prefers-color-scheme: dark)" srcset="screenshots/device-dark.png"><img src="screenshots/device.png" width="380" alt="Мій iPhone"></picture><br>Мій iPhone | <picture><source media="(prefers-color-scheme: dark)" srcset="screenshots/activation-dark.png"><img src="screenshots/activation.png" width="380" alt="Блокування активації"></picture><br>Блокування активації |
-| <picture><source media="(prefers-color-scheme: dark)" srcset="screenshots/proof-dark.png"><img src="screenshots/proof.png" width="380" alt="Докази власності"></picture><br>Докази власності | <picture><source media="(prefers-color-scheme: dark)" srcset="screenshots/reset-dark.png"><img src="screenshots/reset.png" width="380" alt="Скидання"></picture><br>Скидання |
+| <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Dimonchikk/Reclaim/main/screenshots/device-dark.png"><img src="screenshots/device.png" width="380" alt="Мій iPhone"></picture><br>Мій iPhone | <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Dimonchikk/Reclaim/main/screenshots/activation-dark.png"><img src="screenshots/activation.png" width="380" alt="Блокування активації"></picture><br>Блокування активації |
+| <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Dimonchikk/Reclaim/main/screenshots/proof-dark.png"><img src="screenshots/proof.png" width="380" alt="Докази власності"></picture><br>Докази власності | <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Dimonchikk/Reclaim/main/screenshots/reset-dark.png"><img src="screenshots/reset.png" width="380" alt="Скидання"></picture><br>Скидання |
 
 </div>
 </details>
