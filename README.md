@@ -1,14 +1,59 @@
+<div align="center">
+
+<img src="icon.png" width="128" alt="Іконка Reclaim">
+
 # Reclaim
 
-Чесний помічник для власника iPhone, який забув пароль або Apple ID. Windows-застосунок (Electron) у стилі Apple.
+**Забув пароль від iPhone або Apple ID? Поверни доступ чесним шляхом.**<br>
+Windows-застосунок у стилі Apple, який крок за кроком веде власника iPhone<br>
+до офіційних інструментів Apple. Без обходів блокувань і прихованих завантажень.
 
-**Застосунок не обходить блокування активації і не знімає Apple ID без пароля власника.** Усі кроки ведуть до офіційних інструментів Apple.
+[![Build](https://img.shields.io/github/actions/workflow/status/Dimonchikk/Reclaim/release.yml?label=Build&logo=github)](../../actions/workflows/release.yml)
+[![Release](https://img.shields.io/github/v/release/Dimonchikk/Reclaim?label=Release&color=8b5cf6)](../../releases/latest)
+![Windows](https://img.shields.io/badge/Windows-10%2F11-0078D6?logo=windows&logoColor=white)
+![Electron](https://img.shields.io/badge/Electron-33-47848F?logo=electron&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-22-5FA04E?logo=nodedotjs&logoColor=white)
+![Мова](https://img.shields.io/badge/мова-українська-FFD500)
 
-- Сайт: `https://dimonchikk.github.io/Reclaim/` (публікується з кореня гілки `main`)
-- Завантаження: [останній реліз](../../releases/latest)
+### [⬇️ Завантажити останній реліз](../../releases/latest/download/Reclaim-setup.exe) · [Можливості](#що-вміє) · [Запуск](#запуск-з-вихідного-коду) · [Збірка](#збірка-встановлювача) · [Сайт](https://dimonchikk.github.io/Reclaim/)
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="screenshots/home-dark.png">
+  <img src="screenshots/home.png" width="760" alt="Головний екран Reclaim">
+</picture>
+
+</div>
+
+---
+
+> [!IMPORTANT]
+> **Reclaim не обходить блокування активації і не знімає Apple ID без пароля власника.** Усі кроки ведуть до офіційних інструментів Apple.
 
 ## Що вміє
-Відновлення Apple ID · Блокування активації · Докази власності (PDF-пакет) · Мій iPhone (модель, iOS, серійний номер, IMEI) · Скидання через режим відновлення · Вихід із режиму відновлення · Screen Time · Теми: системна, світла, темна.
+
+| | |
+|---|---|
+| 🔑 **Відновлення Apple ID** | забули пароль чи пошту: покроково через офіційне відновлення Apple |
+| 🔒 **Блокування активації** | iPhone просить чужий Apple ID: що робити і як звернутися в Apple |
+| 📄 **Докази власності** | чек, серійний номер та IMEI в одному PDF для підтримки Apple |
+| 📱 **Мій iPhone** | модель, версія iOS, серійний номер, IMEI |
+| ♻️ **Скидання через режим відновлення** | для власного пристрою, коли забуто код-пароль |
+| 🚪 **Вихід із режиму відновлення** | якщо iPhone «завис» на екрані з кабелем |
+| ⏳ **Screen Time** | що робити, якщо забуто код «Екранного часу» |
+| 🌗 **Теми** | системна, світла й темна |
+
+<details>
+<summary><b>📸 Більше знімків екрана</b></summary>
+<br>
+<div align="center">
+
+| | |
+|:---:|:---:|
+| <picture><source media="(prefers-color-scheme: dark)" srcset="screenshots/device-dark.png"><img src="screenshots/device.png" width="380" alt="Мій iPhone"></picture><br>Мій iPhone | <picture><source media="(prefers-color-scheme: dark)" srcset="screenshots/activation-dark.png"><img src="screenshots/activation.png" width="380" alt="Блокування активації"></picture><br>Блокування активації |
+| <picture><source media="(prefers-color-scheme: dark)" srcset="screenshots/proof-dark.png"><img src="screenshots/proof.png" width="380" alt="Докази власності"></picture><br>Докази власності | <picture><source media="(prefers-color-scheme: dark)" srcset="screenshots/reset-dark.png"><img src="screenshots/reset.png" width="380" alt="Скидання"></picture><br>Скидання |
+
+</div>
+</details>
 
 ## Запуск з вихідного коду
 ```
