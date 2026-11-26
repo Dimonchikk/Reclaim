@@ -3,6 +3,8 @@
   "productName": "Reclaim",
   "version": "1.3.0",
   "description": "Чесний помічник для власника iPhone: офіційне відновлення Apple ID та доступу до пристрою",
+  "license": "MIT",
+  "author": "Dmytro Brychnik (Dimonchikk)",
   "main": "main.js",
   "scripts": {
     "start": "electron .",

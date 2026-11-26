@@ -16,6 +16,7 @@
   document.querySelectorAll('.rel').forEach(function (a) { a.href = base + '/releases'; });
   document.querySelectorAll('.repo').forEach(function (a) { a.href = base; });
   document.querySelectorAll('.notice').forEach(function (a) { a.href = base + '/blob/main/bin/NOTICE.txt'; });
+  document.querySelectorAll('.license').forEach(function (a) { a.href = base + '/blob/main/LICENSE'; });
 
   function setVer(v) { document.querySelectorAll('.ver').forEach(function (s) { s.textContent = v; }); }
   setVer(cfg.version || '');
@@ -53,17 +54,17 @@
   // ----- галерея -----
   var shots = [
     { n: 'home',       c: 'Головна: оберіть, що сталося, і Reclaim проведе офіційним шляхом Apple.' },
-    { n: 'device',     c: 'Мій iPhone: що готово, а чого бракує, плюс модель, версія iOS, серійний номер та IMEI.' },
+    { n: 'device',     c: 'Діагностика iPhone: активація, код-пароль, «Знайти iPhone», SIM-картка, батарея й пам’ять, плюс поради, куди звернутися.' },
+    { n: 'passcode',   c: 'Забули код екрана: чотири офіційні способи, від того, що зберігає дані, до скидання.' },
+    { n: 'activation', c: 'Блокування активації: що це, що робити власнику й покупцеві і як подати запит до Apple.' },
     { n: 'proof',      c: 'Докази власності: чек-лист для підтримки Apple і PDF-пакет із серійним номером та IMEI.' },
-    { n: 'activation', c: 'Блокування активації: що це, чому воно є і як його знімає власник.' },
-    { n: 'reset',      c: 'Скидання через режим відновлення: кроки для різних моделей. Саме скидання виконує програма Apple.' },
-    { n: 'about',      c: 'Про застосунок: версія, вбудовані утиліти, стан драйвера й видалення.' }
+    { n: 'home-glass', c: 'Тема «Скло»: під вікном розмиті шпалери вашого робочого стола, як у «Тихому ПК».', fixed: true }
   ];
   var cur = 0, img = document.getElementById('galImg'), cap = document.getElementById('galCap');
   function show(i) {
     cur = i;
     var s = shots[i], dark = root.getAttribute('data-theme') === 'dark';
-    var src = 'screenshots/' + s.n + (dark ? '-dark' : '') + '.png';
+    var src = 'screenshots/' + s.n + (dark && !s.fixed ? '-dark' : '') + '.png';
     if (img.getAttribute('src') !== src) {
       img.style.opacity = 0;
       setTimeout(function () { img.src = src; img.onload = function () { img.style.opacity = 1; }; }, 150);

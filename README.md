@@ -5,11 +5,12 @@
 # Reclaim
 
 **Забув код iPhone чи пароль Apple ID? Поверни доступ чесним шляхом.**<br>
-Windows-застосунок у стилі Apple, який крок за кроком веде власника iPhone<br>
-до офіційних інструментів Apple. Без обходів блокувань і прихованих завантажень.
+Windows-застосунок у стилі Apple: діагностика iPhone через кабель і покрокові<br>
+офіційні шляхи Apple для 12 ситуацій. Без обходів блокувань і прихованих завантажень.
 
 [![Build](https://img.shields.io/github/actions/workflow/status/Dimonchikk/Reclaim/release.yml?label=Build&logo=github)](../../actions/workflows/release.yml)
 [![Release](https://img.shields.io/github/v/release/Dimonchikk/Reclaim?label=Release&color=8b5cf6)](../../releases/latest)
+[![License](https://img.shields.io/badge/License-MIT-2EA44F)](LICENSE)
 ![Windows](https://img.shields.io/badge/Windows-10%2F11-0078D6?logo=windows&logoColor=white)
 ![Electron](https://img.shields.io/badge/Electron-33-47848F?logo=electron&logoColor=white)
 ![Node.js](https://img.shields.io/badge/Node.js-22-5FA04E?logo=nodedotjs&logoColor=white)
@@ -56,8 +57,9 @@ Windows-застосунок у стилі Apple, який крок за кро�
 
 | | |
 |:---:|:---:|
-| <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Dimonchikk/Reclaim/main/screenshots/device-dark.png"><img src="screenshots/device.png" width="380" alt="Мій iPhone"></picture><br>Мій iPhone | <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Dimonchikk/Reclaim/main/screenshots/activation-dark.png"><img src="screenshots/activation.png" width="380" alt="Блокування активації"></picture><br>Блокування активації |
-| <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Dimonchikk/Reclaim/main/screenshots/proof-dark.png"><img src="screenshots/proof.png" width="380" alt="Докази власності"></picture><br>Докази власності | <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Dimonchikk/Reclaim/main/screenshots/reset-dark.png"><img src="screenshots/reset.png" width="380" alt="Скидання"></picture><br>Скидання |
+| <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Dimonchikk/Reclaim/main/screenshots/device-dark.png"><img src="screenshots/device.png" width="380" alt="Діагностика iPhone"></picture><br>Діагностика iPhone | <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Dimonchikk/Reclaim/main/screenshots/passcode-dark.png"><img src="screenshots/passcode.png" width="380" alt="Забули код екрана"></picture><br>Забули код екрана |
+| <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Dimonchikk/Reclaim/main/screenshots/activation-dark.png"><img src="screenshots/activation.png" width="380" alt="Блокування активації"></picture><br>Блокування активації | <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Dimonchikk/Reclaim/main/screenshots/proof-dark.png"><img src="screenshots/proof.png" width="380" alt="Докази власності"></picture><br>Докази власності |
+| <img src="screenshots/home-glass.png" width="380" alt="Тема «Скло»"><br>Тема «Скло» | <img src="screenshots/device-glass.png" width="380" alt="Діагностика в темі «Скло»"><br>Діагностика в темі «Скло» |
 
 </div>
 </details>
@@ -98,6 +100,7 @@ Windows і драйвер Apple (служба Apple Mobile Device Service) з з
 ```
 main.js, preload.js   головний процес і міст
 CHANGES.md            журнал змін (розділ «## номер» стає описом релізу)
+LICENSE               ліцензія MIT
 build/                іконка застосунку та інсталятора
 src/                  інтерфейс застосунку (i18n.js і lang/ — переклади російською та англійською)
 bin/                  вбудовані утиліти libimobiledevice + NOTICE.txt
@@ -105,5 +108,7 @@ index.html, script.js, config.js, icon.png, screenshots/   сайт (GitHub Page
 .github/workflows/    release.yml (збирання інсталятора)
 ```
 
-## Ліцензії
-Вбудовані утиліти мають власні ліцензії (LGPL-2.1+/GPL, OpenSSL: Apache-2.0), див. `bin/NOTICE.txt`. Apple, iPhone, iTunes та Apple ID є торговими марками Apple Inc.; проєкт з Apple не пов'язаний.
+## Ліцензія
+Код Reclaim поширюється за ліцензією [MIT](LICENSE): його можна вільно використовувати, змінювати й поширювати, зберігши повідомлення про авторство.
+
+Вбудовані утиліти в `bin/` під MIT не підпадають і мають власні ліцензії (LGPL-2.1+/GPL, OpenSSL: Apache-2.0), див. `bin/NOTICE.txt`. Apple, iPhone, iTunes та Apple ID є торговими марками Apple Inc.; проєкт з Apple не пов'язаний.
