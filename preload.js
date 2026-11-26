@@ -1,5 +1,6 @@
 const { contextBridge, ipcRenderer } = require('electron');
 contextBridge.exposeInMainWorld('api', {
+  setLang: (l) => ipcRenderer.send('set-lang', l),
   openExternal: (url) => ipcRenderer.invoke('open-external', url),
   openAppleDevices: () => ipcRenderer.invoke('open-apple-devices'),
   driverStatus: () => ipcRenderer.invoke('driver-status'),

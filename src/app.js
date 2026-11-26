@@ -417,7 +417,7 @@
         <p id="abUpd" class="small">Перевіряю…</p>
         <p class="small">Reclaim питає GitHub лише про номер останньої версії: під час запуску й раз на годину. Нічого не завантажується й не встановлюється без вашої дії.</p>
         <div class="row" id="abUpdRow"><button class="btn secondary" id="abCheck">Шукати оновлення</button></div></div>
-      <div class="card"><h3>Що нового</h3><div id="abLog" class="small">…</div></div>
+      <div class="card"><h3>Що нового</h3><div id="abLog" class="small" translate="no">…</div></div>
       <div class="card info"><h3>Що Reclaim не робить</h3>
         <ul class="plain"><li>Не обходить блокування активації.</li><li>Не знімає Apple ID без пароля власника.</li></ul>
         <p>Усі кроки ведуть до офіційних інструментів Apple: iforgot.apple.com, Apple Devices або iTunes, налаштувань iPhone та підтримки Apple.</p></div>
@@ -436,6 +436,8 @@
     ['special', 'Особливі випадки', ['buy', 'legacy', 'proof']],
     ['iphone', 'Мій iPhone', ['device', 'reset', 'exit']],
   ];
+  const I18N = window.I18N || { lang: 'uk', locale: 'uk-UA', set() {} };
+  const LANG_BTNS = [['uk', 'УКР', 'Українська'], ['ru', 'РУС', 'Русский'], ['en', 'ENG', 'English']];
   const THEMES = [['system', 'Авто'], ['light', 'Світла'], ['dark', 'Темна'], ['glass', 'Скло']];
   const CHEV = '<svg class="chev" viewBox="0 0 12 12"><path d="M3 4.5l3 3 3-3"/></svg>';
   const SEARCH = '<svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/></svg>';
@@ -447,7 +449,8 @@
     const item = (sc) => `<button class="nav" data-go="${sc.id}" title="${esc(sc.sub)}" data-q="${esc((sc.nav + ' ' + sc.sub).toLowerCase())}">${ico(sc.icon)}<span class="t">${sc.nav}</span></button>`;
     const closed = closedGroups();
     sidebar.innerHTML =
-      `<div class="brand">${ico('phone')}Reclaim</div>` +
+      `<div class="brand">${ico('phone')}<span>Reclaim</span>` +
+        `<div class="lang" translate="no">${LANG_BTNS.map((l) => `<button data-lang="${l[0]}" class="${l[0] === I18N.lang ? 'on' : ''}" title="${l[2]}">${l[1]}</button>`).join('')}</div></div>` +
       `<label class="search">${SEARCH}<input id="navSearch" type="search" placeholder="Пошук" autocomplete="off" spellcheck="false"></label>` +
       item(byId('home')) +
       GROUPS.map(([gid, title, ids]) => {
@@ -476,7 +479,8 @@
     const q = $('#navSearch').value.trim().toLowerCase();
     let any = false;
     document.querySelectorAll('.sidebar .nav[data-q]').forEach((n) => {
-      const hit = !q || n.dataset.q.includes(q);
+      const hay = n.dataset.q + ' ' + (n.textContent + ' ' + (n.title || '')).toLowerCase(); // і українською, і поточною мовою
+      const hit = !q || hay.includes(q);
       n.hidden = !hit; if (hit && q) any = true;
     });
     GROUPS.forEach(([gid]) => {
@@ -513,6 +517,7 @@
   function go(id) {
     clearInterval(timer); timer = null; devRefresh = null;
     const s = SCREENS.find((x) => x.id === id) || SCREENS[0];
+    try { sessionStorage.setItem('screen', s.id); } catch (_) {}
     page.innerHTML = `<div class="page-ico">${ico(s.icon, true)}</div>` + s.render();
     page.style.animation = 'none'; void page.offsetWidth; page.style.animation = '';
     document.querySelectorAll('.nav').forEach((n) => n.classList.toggle('active', n.dataset.go === s.id));
@@ -536,6 +541,7 @@
     const g = e.target.closest('[data-go]'); if (g) return go(g.dataset.go);
     const th = e.target.closest('[data-theme-set]'); if (th) return setTheme(th.dataset.themeSet);
     const gr = e.target.closest('[data-group]'); if (gr) return toggleGroup(gr.dataset.group);
+    const lg = e.target.closest('[data-lang]'); if (lg) return I18N.set(lg.dataset.lang);
     const x = e.target.closest('[data-ext]'); if (x) return window.api.openExternal(x.dataset.ext);
     const st = e.target.closest('[data-store]'); if (st) return window.api.openAppleDevices();
     const cp = e.target.closest('[data-copy]'); if (cp) return copy(cp.dataset.copy);
@@ -589,7 +595,7 @@
       return { done, serial: $('#serial').value.trim(), imei: $('#imei').value.trim() };
     }
     function save() { store.set(collect()); }
-    $('#copyNums').addEventListener('click', () => { const d = collect(); copy(`Серійний номер: ${d.serial}\nIMEI: ${d.imei}`); });
+    $('#copyNums').addEventListener('click', () => { const d = collect(); copy(`${I18N.t('Серійний номер')}: ${d.serial}\nIMEI: ${d.imei}`); });
     $('#savePdf').addEventListener('click', async () => {
       const d = collect();
       const items = PROOF_ITEMS.map((p) => ({ label: p[1], done: !!d.done[p[0]] }));
@@ -673,7 +679,7 @@
     const freePct = d.disk.total && d.disk.free != null ? Math.round((d.disk.free / (d.disk.data || d.disk.total)) * 100) : null;
     return {
       act: act === 'Activated' || act === 'FactoryActivated' ? ['ok', 'Активовано'] : act === 'Unactivated' ? ['bad', 'Не активовано'] : ['na', act || 'Невідомо'],
-      pass: d.security.passcode === true ? ['ok', 'Увімкнено'] : d.security.passcode === false ? ['warn', 'Не встановлено'] : ['na', 'Невідомо'],
+      pass: d.security.passcode === true ? ['ok', 'Увімкнено'] : d.security.passcode === false ? ['warn', 'Не задано'] : ['na', 'Невідомо'],
       find: d.security.findMy === true ? ['ok', 'Увімкнено'] : d.security.findMy === false ? ['na', 'Вимкнено'] : ['na', 'Не вдалося визначити'],
       sim,
       bat: b.health != null ? [b.health >= 80 ? 'ok' : 'bad', `${b.health}% ємності`] : b.level != null ? ['na', `Заряд ${b.level}%`] : ['na', 'Невідомо'],
@@ -697,7 +703,7 @@
     if (!d || !d.ok) return `<div class="card warn"><h3>Не вдалося зібрати діагностику</h3><p>Розблокуйте iPhone і натисніть «Оновити діагностику».</p><div class="row"><button class="btn secondary" id="diagRefresh">Оновити діагностику</button></div></div>`;
     const f = diagFacts(d);
     const chip = (t, v) => `<div class="chip ${v[0]}"><span>${t}</span><b>${esc(v[1])}</b></div>`;
-    const kvRows = (rows) => `<div class="kv">${rows.filter((x) => x[1] !== '' && x[1] != null).map((x) => `<div class="k">${x[0]}</div><div class="v">${esc(x[1])}</div><div>${x[2] ? `<button class="btn secondary small" data-copy="${esc(x[1])}">Копіювати</button>` : ''}</div>`).join('')}</div>`;
+    const kvRows = (rows) => `<div class="kv">${rows.filter((x) => x[1] !== '' && x[1] != null).map((x) => `<div class="k">${x[0]}</div><div class="v"${x[2] ? ' translate="no"' : ''}>${esc(x[1])}</div><div>${x[2] ? `<button class="btn secondary small" data-copy="${esc(x[1])}">Копіювати</button>` : ''}</div>`).join('')}</div>`;
     const dv = d.device, b = d.battery, k = d.disk;
     const used = k.total && k.free != null ? Math.max(0, Math.min(100, 100 - Math.round((k.free / (k.data || k.total)) * 100))) : null;
     return `
@@ -711,20 +717,20 @@
           ${b.health != null ? `<div class="meter"><i style="width:${b.health}%;background:${b.health >= 80 ? 'var(--ok)' : 'var(--danger)'}"></i></div>` : ''}</div>
         <div class="card"><h3>Пам’ять</h3>${kvRows([['Обсяг', gb(k.total)], ['Вільно', gb(k.free)]])}
           ${used != null ? `<div class="meter"><i style="width:${used}%"></i></div><p class="small" style="margin-top:6px">Зайнято ${used}%</p>` : ''}</div>
-        <div class="card wide"><h3>Зв’язок</h3>${kvRows([['SIM-картка', f.sim[1]], ['Номер телефону', d.sim.phone, 1], ['ICCID', d.sim.iccid, 1], ['Модем', d.sim.baseband]])}</div>
+        <div class="card wide"><h3>Зв’язок</h3>${kvRows([['SIM-картка', f.sim[1]], ['Номер телефону', d.sim.phone || 'iOS не передає номер через кабель', d.sim.phone ? 1 : 0], ['ICCID', d.sim.iccid, 1], ['Модем', d.sim.baseband]])}</div>
       </div>
       <div class="row diag-actions"><button class="btn" id="diagCopy">Копіювати звіт</button><button class="btn secondary" id="diagRefresh">Оновити діагностику</button><button class="btn secondary" data-go="proof">Додати номери до доказів власності</button></div>`;
   }
   function diagReport(d) {
-    const f = diagFacts(d), dv = d.device, b = d.battery;
+    const f = diagFacts(d), dv = d.device, b = d.battery, t = I18N.t;
     return [
-      `Звіт Reclaim · ${new Date().toLocaleString('uk-UA')}`,
-      `Пристрій: ${dv.name} · ${modelName(dv.model)} · ${dv.modelNumber}`,
+      `${t('Звіт Reclaim')} · ${new Date().toLocaleString(I18N.locale)}`,
+      `${t('Пристрій')}: ${dv.name} · ${modelName(dv.model)} · ${dv.modelNumber}`,
       `iOS: ${dv.ios} ${dv.build ? `(${dv.build})` : ''}`,
-      `Серійний номер: ${dv.serial}`, `IMEI: ${dv.imei}${dv.imei2 ? `, ${dv.imei2}` : ''}`,
-      `Активація: ${f.act[1]}`, `Код-пароль: ${f.pass[1]}`, `Знайти iPhone: ${f.find[1]}`, `SIM-картка: ${f.sim[1]}`,
-      `Батарея: ${b.health != null ? b.health + '%' : '—'}, циклів: ${b.cycles ?? '—'}`,
-      `Пам’ять: ${gb(d.disk.total)}, вільно ${gb(d.disk.free)}`,
+      `${t('Серійний номер')}: ${dv.serial}`, `IMEI: ${dv.imei}${dv.imei2 ? `, ${dv.imei2}` : ''}`,
+      `${t('Активація')}: ${t(f.act[1])}`, `${t('Код-пароль')}: ${t(f.pass[1])}`, `${t('Знайти iPhone')}: ${t(f.find[1])}`, `${t('SIM-картка')}: ${t(f.sim[1])}`,
+      `${t('Батарея')}: ${b.health != null ? b.health + '%' : '—'}, ${t('циклів')}: ${b.cycles ?? '—'}`,
+      `${t('Пам’ять')}: ${gb(d.disk.total)}, ${t('вільно')} ${gb(d.disk.free)}`,
     ].join('\n');
   }
   document.addEventListener('click', (e) => {
@@ -767,7 +773,7 @@
     const log = await window.api.changelog();
     if ($('#abLog')) {
       $('#abLog').innerHTML = log.length
-        ? log.map((v) => `<h4 style="margin:12px 0 4px;color:var(--text)">Версія ${esc(ver(v.version))}${ver(v.version) === ver(info.version) ? ' (поточна)' : ''}</h4><ul class="plain">${v.items.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>`).join('')
+        ? log.map((v) => `<h4 style="margin:12px 0 4px;color:var(--text)">${I18N.t('Версія')} ${esc(ver(v.version))}${ver(v.version) === ver(info.version) ? ` (${I18N.t('поточна')})` : ''}</h4><ul class="plain">${v.items.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>`).join('')
         : 'Журнал змін недоступний.';
     }
     $('#uninstall').addEventListener('click', async () => {
@@ -812,7 +818,7 @@
   }
 
   // ---------- Історія підключених iPhone ----------
-  const fmtDate = (iso) => { try { return new Date(iso).toLocaleDateString('uk-UA'); } catch (_) { return ''; } };
+  const fmtDate = (iso) => { try { return new Date(iso).toLocaleDateString(I18N.locale); } catch (_) { return ''; } };
   let histCache = [];
   async function renderHistory() {
     const box = $('#histBox');
@@ -850,9 +856,12 @@
     }
   });
 
+  if (window.api.setLang) window.api.setLang(I18N.lang); // діалоги й PDF тією ж мовою
   buildSidebar();
   applyGlass();
-  go('home');
+  let start = 'home';
+  try { start = sessionStorage.getItem('screen') || 'home'; } catch (_) {}
+  go(start);
   checkUpdate();
   setInterval(checkUpdate, 60 * 60 * 1000); // далі раз на годину
 })();

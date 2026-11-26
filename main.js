@@ -29,6 +29,23 @@ const REPO = 'Dimonchikk/Reclaim'; // репозиторій, у якому ви
 // Вбудовані утиліти: поруч із кодом (розробка) або в resources/bin (зібраний застосунок).
 const BIN_DIR = app.isPackaged ? path.join(process.resourcesPath, 'bin') : path.join(__dirname, 'bin');
 
+// ---------- Мова для діалогів і PDF (той самий словник, що й в інтерфейсі) ----------
+let LANG = 'uk';
+let MAIN_DICT = {};
+const LOCALES = { uk: 'uk-UA', ru: 'ru-RU', en: 'en-US' };
+function loadLang(l) {
+  LANG = LOCALES[l] ? l : 'uk';
+  MAIN_DICT = {};
+  if (LANG === 'uk') return;
+  try {
+    const sandbox = { window: {} };
+    require('vm').runInNewContext(fs.readFileSync(path.join(__dirname, 'src', 'lang', LANG + '.js'), 'utf8'), sandbox);
+    MAIN_DICT = (sandbox.window.RECLAIM_LANG[LANG] || {}).dict || {};
+  } catch (_) {}
+}
+const T = (s) => (LANG === 'uk' ? s : MAIN_DICT[s] || s);
+ipcMain.on('set-lang', (_e, l) => loadLang(l));
+
 function openSafe(url) {
   try {
     const u = new URL(url);
@@ -315,12 +332,12 @@ ipcMain.handle('history-clear', async (e) => {
   const win = BrowserWindow.fromWebContents(e.sender);
   const { response } = await dialog.showMessageBox(win, {
     type: 'question',
-    buttons: ['Очистити', 'Скасувати'],
+    buttons: [T('Очистити'), T('Скасувати')],
     defaultId: 1,
     cancelId: 1,
-    title: 'Історія iPhone',
-    message: 'Очистити історію підключених iPhone?',
-    detail: 'Видалиться список на цьому комп’ютері. На самих телефонах нічого не зміниться.',
+    title: T('Історія iPhone'),
+    message: T('Очистити історію підключених iPhone?'),
+    detail: T('Видалиться список на цьому комп’ютері. На самих телефонах нічого не зміниться.'),
   });
   if (response !== 0) return { ok: false };
   writeHistory([]);
@@ -389,12 +406,12 @@ ipcMain.handle('uninstall', async (e) => {
   if (app.isPackaged && fs.existsSync(uninstaller)) {
     const { response } = await dialog.showMessageBox(win, {
       type: 'question',
-      buttons: ['Видалити', 'Скасувати'],
+      buttons: [T('Видалити'), T('Скасувати')],
       defaultId: 1,
       cancelId: 1,
-      title: 'Видалення Reclaim',
-      message: 'Видалити Reclaim з цього комп’ютера?',
-      detail: 'Запуститься стандартна програма видалення Windows.',
+      title: T('Видалення Reclaim'),
+      message: T('Видалити Reclaim з цього комп’ютера?'),
+      detail: T('Запуститься стандартна програма видалення Windows.'),
     });
     if (response !== 0) return { ok: false, mode: 'cancelled' };
     spawn(uninstaller, [], { detached: true, stdio: 'ignore' }).unref();
@@ -415,21 +432,21 @@ const escHtml = (s) =>
 ipcMain.handle('save-proof-pdf', async (_e, data) => {
   const { items = [], serial = '', imei = '' } = data || {};
   const html = `<!doctype html><meta charset="utf-8"><body style="font-family:Segoe UI,Arial,sans-serif;padding:40px;color:#1D1D1F">
-    <h1 style="font-weight:600">Докази власності iPhone</h1>
-    <p style="color:#6E6E73">Складено в Reclaim · ${new Date().toLocaleDateString('uk-UA')}</p>
-    <h2>Серійні номери</h2>
-    <p>Серійний номер: <b>${escHtml(serial) || '—'}</b></p>
+    <h1 style="font-weight:600">${T('Докази власності iPhone')}</h1>
+    <p style="color:#6E6E73">${T('Складено в Reclaim')} · ${new Date().toLocaleDateString(LOCALES[LANG])}</p>
+    <h2>${T('Серійні номери')}</h2>
+    <p>${T('Серійний номер')}: <b>${escHtml(serial) || '—'}</b></p>
     <p>IMEI: <b>${escHtml(imei) || '—'}</b></p>
-    <h2>Що підготовлено</h2>
-    <ul>${items.map((i) => `<li>${i.done ? '☑' : '☐'} ${escHtml(i.label)}</li>`).join('')}</ul>
-    <p style="color:#6E6E73;margin-top:32px">Цей список допомагає підготуватися до звернення в підтримку Apple.</p>`;
+    <h2>${T('Що підготовлено')}</h2>
+    <ul>${items.map((i) => `<li>${i.done ? '☑' : '☐'} ${escHtml(T(i.label))}</li>`).join('')}</ul>
+    <p style="color:#6E6E73;margin-top:32px">${T('Цей список допомагає підготуватися до звернення в підтримку Apple.')}</p>`;
   const tmp = new BrowserWindow({ show: false, webPreferences: { sandbox: true } });
   try {
     await tmp.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(html));
     const pdf = await tmp.webContents.printToPDF({ pageSize: 'A4' });
     const { canceled, filePath } = await dialog.showSaveDialog({
-      title: 'Зберегти пакет доказів',
-      defaultPath: 'dokazy-vlasnosti.pdf',
+      title: T('Зберегти пакет доказів'),
+      defaultPath: LANG === 'en' ? 'proof-of-ownership.pdf' : LANG === 'ru' ? 'dokazatelstva-vladeniya.pdf' : 'dokazy-vlasnosti.pdf',
       filters: [{ name: 'PDF', extensions: ['pdf'] }],
     });
     if (canceled || !filePath) return { ok: false };

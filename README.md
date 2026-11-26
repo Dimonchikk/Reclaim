@@ -13,7 +13,7 @@ Windows-застосунок у стилі Apple, який крок за кро�
 ![Windows](https://img.shields.io/badge/Windows-10%2F11-0078D6?logo=windows&logoColor=white)
 ![Electron](https://img.shields.io/badge/Electron-33-47848F?logo=electron&logoColor=white)
 ![Node.js](https://img.shields.io/badge/Node.js-22-5FA04E?logo=nodedotjs&logoColor=white)
-![Мова](https://img.shields.io/badge/мова-українська-FFD500)
+![Мови](https://img.shields.io/badge/мови-УКР%20·%20РУС%20·%20ENG-FFD500)
 
 ### [⬇️ Завантажити останній реліз](../../releases/latest/download/Reclaim-setup.exe) · [Можливості](#що-вміє) · [Запуск](#запуск-з-вихідного-коду) · [Збірка](#збірка-встановлювача) · [Сайт](https://dimonchikk.github.io/Reclaim/)
 
@@ -47,6 +47,7 @@ Windows-застосунок у стилі Apple, який крок за кро�
 | 🩺 **Діагностика iPhone** | через кабель: активація, код-пароль, «Знайти iPhone», SIM, здоров’я батареї й цикли, пам’ять, IMEI, і поради, куди звернутися |
 | ♻️ **Скидання й вихід із режиму відновлення** | комбінації кнопок для кожної моделі |
 | 🪟 **Теми** | авто, світла, темна й «Скло» з розмитими шпалерами робочого стола |
+| 🌐 **Мови** | українська, російська й англійська, перемикач поруч із назвою |
 
 <details>
 <summary><b>📸 Більше знімків екрана</b></summary>
@@ -98,7 +99,7 @@ Windows і драйвер Apple (служба Apple Mobile Device Service) з з
 main.js, preload.js   головний процес і міст
 CHANGES.md            журнал змін (розділ «## номер» стає описом релізу)
 build/                іконка застосунку та інсталятора
-src/                  інтерфейс застосунку
+src/                  інтерфейс застосунку (i18n.js і lang/ — переклади російською та англійською)
 bin/                  вбудовані утиліти libimobiledevice + NOTICE.txt
 index.html, script.js, config.js, icon.png, screenshots/   сайт (GitHub Pages)
 .github/workflows/    release.yml (збирання інсталятора)
