@@ -142,10 +142,15 @@ p { margin: 0 0 12px; }
 .field input { height: 44px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--card); color: var(--text); font: inherit; }
 .field input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
 
-.kv { display: grid; grid-template-columns: 170px 1fr auto; gap: 0 12px; align-items: center; }
-.kv > div { padding: 10px 0; border-bottom: 1px solid var(--line); }
+/* Таблиця «назва — значення — кнопка»: комірки рядка однакової висоти, тож лінія під рядком суцільна й рівна */
+.kv { display: grid; grid-template-columns: 170px 1fr auto; gap: 0; align-items: stretch; }
+.kv > div { display: flex; align-items: center; min-height: 44px; padding: 6px 12px 6px 0; border-bottom: 1px solid var(--line); }
+.kv > div:nth-child(3n) { padding-right: 0; justify-content: flex-end; }
+.kv > div:nth-last-child(-n+3) { border-bottom: 0; }
 .kv .k { color: var(--text2); font-size: 14px; }
-.kv .v { font-weight: 500; word-break: break-all; }
+.kv .v { font-weight: 500; word-break: normal; overflow-wrap: anywhere; }
+.diag-actions { margin: 4px 0 24px; }
+.hist-item + .hist-item { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
 
 /* Що робить / чого не робить */
 .modes { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
@@ -202,7 +207,6 @@ ul.plain { margin: 0 0 12px; padding-left: 20px; } ul.plain li { margin-bottom: 
 .dgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; align-items: start; }
 .dgrid .card.wide { grid-column: 1 / -1; }
 .dgrid .kv { grid-template-columns: 150px 1fr auto; }
-.dgrid .kv .v { word-break: normal; overflow-wrap: anywhere; }
 .meter { height: 8px; border-radius: 4px; background: var(--hover); overflow: hidden; margin-top: 12px; }
 .meter i { display: block; height: 100%; background: var(--accent); border-radius: 4px; }
 @media (max-width: 1100px) { .dgrid { grid-template-columns: 1fr; } .chips { grid-template-columns: 1fr 1fr; } }

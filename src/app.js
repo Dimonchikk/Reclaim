@@ -713,7 +713,7 @@
           ${used != null ? `<div class="meter"><i style="width:${used}%"></i></div><p class="small" style="margin-top:6px">Зайнято ${used}%</p>` : ''}</div>
         <div class="card wide"><h3>Зв’язок</h3>${kvRows([['SIM-картка', f.sim[1]], ['Номер телефону', d.sim.phone, 1], ['ICCID', d.sim.iccid, 1], ['Модем', d.sim.baseband]])}</div>
       </div>
-      <div class="row"><button class="btn" id="diagCopy">Копіювати звіт</button><button class="btn secondary" id="diagRefresh">Оновити діагностику</button><button class="btn secondary" data-go="proof">Додати номери до доказів власності</button></div>`;
+      <div class="row diag-actions"><button class="btn" id="diagCopy">Копіювати звіт</button><button class="btn secondary" id="diagRefresh">Оновити діагностику</button><button class="btn secondary" data-go="proof">Додати номери до доказів власності</button></div>`;
   }
   function diagReport(d) {
     const f = diagFacts(d), dv = d.device, b = d.battery;
@@ -825,7 +825,7 @@
     }
     box.innerHTML = `<div class="card"><h3>Історія iPhone</h3>
       <p class="small">Зберігається лише на цьому комп’ютері й нікуди не надсилається.</p>
-      ${histCache.map((h, i) => `<div class="kv" style="margin-top:12px">
+      ${histCache.map((h, i) => `<div class="kv hist-item">
         <div class="k">Пристрій</div><div class="v">${esc(h.name || 'iPhone')} · ${esc(modelName(h.model))}</div><div></div>
         <div class="k">Серійний номер</div><div class="v">${esc(h.serial || '—')}</div><div>${h.serial ? `<button class="btn secondary small" data-copy="${esc(h.serial)}">Копіювати</button>` : ''}</div>
         <div class="k">IMEI</div><div class="v">${esc(h.imei || '—')}</div><div>${h.imei ? `<button class="btn secondary small" data-copy="${esc(h.imei)}">Копіювати</button>` : ''}</div>
