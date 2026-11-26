@@ -171,6 +171,7 @@ ipcMain.handle('device-status', async () => {
       if (i > 0) map[line.slice(0, i).trim()] = line.slice(i + 1).trim();
     });
     const info = {
+      udid: udids[0],
       name: map.DeviceName || '',
       model: map.ProductType || '',
       ios: map.ProductVersion || '',
@@ -189,6 +190,78 @@ ipcMain.handle('device-status', async () => {
 });
 
 // Просить iPhone показати вікно «Довіряти цьому комп'ютеру?» — підтверджує лише власник на телефоні.
+// ---------- Діагностика iPhone ----------
+// Лише читання: загальна інформація, батарея, пам'ять, SIM, стан захисту. На телефоні нічого не змінюється.
+function parseKV(out) {
+  const map = {};
+  String(out || '').split(/\r?\n/).forEach((line) => {
+    const i = line.indexOf(':');
+    if (i > 0 && !/^\s/.test(line)) map[line.slice(0, i).trim()] = line.slice(i + 1).trim();
+  });
+  return map;
+}
+// Значення з plist (XML), який друкує idevicediagnostics: перше входження ключа.
+function plistNum(xml, key) {
+  const m = new RegExp(`<key>${key}</key>\\s*<(?:integer|real)>(-?[\\d.]+)</`).exec(xml);
+  return m ? Number(m[1]) : null;
+}
+function plistBool(xml, key) {
+  const m = new RegExp(`<key>${key}</key>\\s*<(true|false)\\s*/>`).exec(xml);
+  return m ? m[1] === 'true' : null;
+}
+const bool = (v) => (v === 'true' ? true : v === 'false' ? false : null);
+const num = (v) => (v === undefined || v === '' || isNaN(Number(v)) ? null : Number(v));
+
+async function deviceDiag(udid) {
+  if (!/^[0-9A-Fa-f-]{20,64}$/.test(String(udid || ''))) return { ok: false, error: 'bad-udid' };
+  const u = ['-u', udid];
+  const g = await runTool('ideviceinfo', u);
+  if (!g.ok) return { ok: false, error: (g.err || g.out).slice(0, 200) };
+  const m = parseKV(g.out);
+  const bat = parseKV((await runTool('ideviceinfo', [...u, '-q', 'com.apple.mobile.battery'])).out);
+  const disk = parseKV((await runTool('ideviceinfo', [...u, '-q', 'com.apple.disk_usage'])).out);
+  const fmip = parseKV((await runTool('ideviceinfo', [...u, '-q', 'com.apple.fmip'])).out);
+  const io = await runTool('idevicediagnostics', [...u, 'ioregentry', 'AppleSmartBattery'], 10000);
+  const x = io.ok ? io.out : '';
+
+  // Здоров'я батареї: готовий відсоток (новіші iPhone) або поточна повна ємність / заводська.
+  const design = plistNum(x, 'DesignCapacity');
+  const full = plistNum(x, 'NominalChargeCapacity') || plistNum(x, 'AppleRawMaxCapacity');
+  let health = plistNum(x, 'MaximumCapacityPercent');
+  if (health == null && design && full) health = Math.min(100, Math.round((full / design) * 100));
+  const temp = plistNum(x, 'Temperature');
+
+  return {
+    ok: true,
+    device: {
+      name: m.DeviceName || '', model: m.ProductType || '', modelNumber: (m.ModelNumber || '') + (m.RegionInfo || ''),
+      ios: m.ProductVersion || '', build: m.BuildVersion || '', serial: m.SerialNumber || '',
+      imei: m.InternationalMobileEquipmentIdentity || '', imei2: m.InternationalMobileEquipmentIdentity2 || '',
+      wifi: m.WiFiAddress || '', bluetooth: m.BluetoothAddress || '', color: m.DeviceEnclosureColor || m.DeviceColor || '',
+    },
+    security: {
+      activation: m.ActivationState || '',
+      passcode: bool(m.PasswordProtected),
+      findMy: bool(fmip.IsAssociated),
+    },
+    sim: {
+      status: m.SIMStatus || '', tray: m.SIMTrayStatus || '', phone: m.PhoneNumber || '',
+      iccid: m.IntegratedCircuitCardIdentity || '', baseband: m.BasebandVersion || '',
+    },
+    battery: {
+      level: num(bat.BatteryCurrentCapacity), charging: bool(bat.BatteryIsCharging),
+      health, cycles: plistNum(x, 'CycleCount'), design, full,
+      temp: temp == null ? null : Math.round(temp / 10) / 10,
+      readable: !!x,
+    },
+    disk: {
+      total: num(disk.TotalDiskCapacity), data: num(disk.TotalDataCapacity),
+      free: num(disk.AmountDataAvailable) ?? num(disk.TotalDataAvailable),
+    },
+  };
+}
+ipcMain.handle('device-diag', (_e, udid) => deviceDiag(udid));
+
 ipcMain.handle('device-pair', async () => {
   const r = await runTool('idevicepair', ['pair'], 20000);
   const text = (r.out + ' ' + r.err).trim();

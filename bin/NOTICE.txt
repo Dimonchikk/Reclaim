@@ -1,7 +1,7 @@
 Вбудовані утиліти (ця папка)
 ============================
 
-Файли: ideviceinfo.exe, idevice_id.exe, idevicepair.exe та бібліотеки,
+Файли: ideviceinfo.exe, idevice_id.exe, idevicepair.exe, idevicediagnostics.exe та бібліотеки,
 від яких вони залежать (libimobiledevice, libplist, libusbmuxd,
 libimobiledevice-glue, OpenSSL 3).
 
@@ -20,7 +20,7 @@ libimobiledevice-glue, OpenSSL 3).
 - OpenSSL 3: Apache License 2.0, https://www.openssl.org
 
 Reclaim запускає ці програми як окремі процеси й не змінює їх.
-Вони лише читають базову інформацію про iPhone і просять пристрій
+Вони лише читають інформацію про iPhone (зокрема стан батареї) і просять пристрій
 показати системне вікно «Довіряти цьому комп'ютеру».
 Для зв'язку з телефоном потрібен драйвер Apple Mobile Device
 (встановлюється з Apple Devices або iTunes).

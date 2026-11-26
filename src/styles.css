@@ -104,6 +104,7 @@ p { margin: 0 0 12px; }
 .card.warn { background: var(--warn-bg); border-color: var(--warn); }
 .card.info { background: var(--info-bg); border-color: transparent; }
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
+.grid.one { grid-template-columns: 1fr; margin-top: 4px; }
 .home-group { font-size: 13px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--text2); margin: 26px 0 10px; }
 .tile { display: flex; align-items: center; gap: 14px; text-align: left; border: 1px solid var(--line); background: var(--card); color: var(--text); font: inherit; border-radius: 14px; padding: 14px 16px; min-height: 76px; cursor: pointer; box-shadow: var(--shadow); transition: transform .2s ease-out, border-color .2s ease-out; }
 .tile:hover { transform: translateY(-2px); border-color: var(--accent); }
@@ -185,3 +186,23 @@ ul.plain { margin: 0 0 12px; padding-left: 20px; } ul.plain li { margin-bottom: 
 .page-ico { margin-bottom: 14px; }
 .tile .ico { margin: 0; }
 .nav.active .ico { box-shadow: inset 0 0 0 .5px rgba(0,0,0,.14), 0 0 0 2px var(--sel); }
+
+/* Діагностика iPhone */
+.chips { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.chip { border-radius: 12px; padding: 10px 12px; background: var(--hover); border-left: 4px solid var(--text2); }
+.chip span { display: block; font-size: 12px; color: var(--text2); }
+.chip b { font-size: 14.5px; }
+.chip.ok { border-color: var(--ok); } .chip.bad { border-color: var(--danger); background: var(--bad-bg); } .chip.warn { border-color: var(--warn); background: var(--warn-bg); } .chip.na { border-color: var(--line); }
+.advice { display: flex; flex-direction: column; }
+.adv { display: flex; gap: 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.adv:last-child { border-bottom: 0; }
+.adv > div { flex: 1; } .adv b { display: block; } .adv span { color: var(--text2); font-size: 14px; }
+.adv i { width: 10px; height: 10px; border-radius: 50%; flex: none; background: var(--accent); }
+.adv.ok i { background: var(--ok); } .adv.bad i { background: var(--danger); } .adv.warn i { background: var(--warn); }
+.dgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; align-items: start; }
+.dgrid .card.wide { grid-column: 1 / -1; }
+.dgrid .kv { grid-template-columns: 150px 1fr auto; }
+.dgrid .kv .v { word-break: normal; overflow-wrap: anywhere; }
+.meter { height: 8px; border-radius: 4px; background: var(--hover); overflow: hidden; margin-top: 12px; }
+.meter i { display: block; height: 100%; background: var(--accent); border-radius: 4px; }
+@media (max-width: 1100px) { .dgrid { grid-template-columns: 1fr; } .chips { grid-template-columns: 1fr 1fr; } }

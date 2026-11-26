@@ -90,7 +90,7 @@
       doesnt: ['Не надсилає ваші дані нікуди: усе лишається на цьому комп’ютері', 'Не гарантує, що Apple підтвердить власність'],
     },
     device: {
-      does: ['Показує назву, модель, версію iOS, серійний номер та IMEI iPhone', 'Запам’ятовує підключені iPhone в історії лише на цьому комп’ютері', 'Перевіряє драйвер Apple і підказує, що зробити, якщо щось не так'],
+      does: ['Перевіряє активацію, код-пароль, «Знайти iPhone», SIM-картку, батарею й пам’ять', 'Підказує, у який розділ звернутися', 'Показує модель, iOS, серійний номер та IMEI', 'Запам’ятовує підключені iPhone в історії лише на цьому комп’ютері', 'Перевіряє драйвер Apple і підказує, що зробити, якщо щось не так'],
       doesnt: ['Нічого не змінює на телефоні', 'Не обходить запит довіри: підтвердити його можете лише ви на екрані iPhone'],
     },
     reset: {
@@ -178,6 +178,7 @@
       <p class="lead">Оберіть, що сталося. Ми проведемо вас офіційним шляхом Apple, крок за кроком.</p>
       <div id="updBox"></div>
       <div id="homeBanner"></div>
+      <div class="grid one">${tile('device', 'Діагностика iPhone', 'Підключіть iPhone кабелем: Reclaim перевірить блокування, SIM, батарею й пам’ять і підкаже, що робити')}</div>
       <div class="home-group">Код і паролі</div>
       <div class="grid">
         ${tile('passcode', 'Забув код екрана', 'iPhone недоступний або просить код')}
@@ -196,7 +197,6 @@
       <div class="grid">
         ${tile('buy', 'Купую iPhone з рук', 'Що перевірити до оплати')}
         ${tile('legacy', 'iPhone рідної людини, яка померла', 'Офіційний шлях Apple для родини')}
-        ${tile('device', 'Інформація про iPhone', 'Модель, iOS, серійний номер, IMEI')}
         ${tile('proof', 'Докази власності', 'Чек, серійний номер та IMEI в одному PDF')}
       </div>
       <p class="small" style="margin-top:24px">Reclaim не обходить захист Apple. Він допомагає власнику повернути доступ законно.</p>`,
@@ -283,13 +283,13 @@
         <div class="row"><button class="btn" id="savePdf">Зберегти як PDF-пакет</button><button class="btn secondary" id="copyNums">Скопіювати номери</button></div>
       </div>`, after: initProof },
 
-    { id: 'device', nav: 'Мій iPhone', sub: 'Підключення й інформація', icon: 'phone', render: () => `
-      <h1>Мій iPhone</h1>
-      <p class="lead">Підключіть iPhone кабелем. Reclaim покаже, що готово, а чого бракує.</p>
-      ${modes('device')}
+    { id: 'device', nav: 'Діагностика iPhone', sub: 'Підключіть кабелем', icon: 'phone', render: () => `
+      <h1>Діагностика iPhone</h1>
+      <p class="lead">Підключіть iPhone кабелем. Reclaim перевірить активацію, код-пароль, «Знайти iPhone», SIM-картку, батарею й пам’ять і підкаже, куди звернутися.</p>
       <div id="devBody"></div>
-      <div class="row"><button class="btn secondary" id="devRefresh">Оновити</button></div>
-      <div id="histBox"></div>`, after: initDevice },
+      <div id="histBox"></div>
+      <h2>Про цей розділ</h2>
+      ${modes('device')}`, after: initDevice },
 
     { id: 'reset', nav: 'Скидання через ПК', sub: 'Режим відновлення, забули код', icon: 'reset', render: () => `
       <h1>Скидання через режим відновлення</h1>
@@ -632,15 +632,109 @@
         R.dev = ['ok', 'iPhone підключено', s.count > 1 ? `Знайдено пристроїв: ${s.count}. Показано перший.` : ''];
         R.trust = ['ok', 'Довіра до цього комп’ютера', 'Підтверджено'];
         const i = s.info;
-        const act = i.activation === 'Activated' ? 'Активовано' : (i.activation || '—');
-        const kv = [['Назва', i.name], ['Модель', modelName(i.model)], ['Версія iOS', i.ios], ['Серійний номер', i.serial], ['IMEI', i.imei], ['Стан активації', act]];
-        info = `<div class="card"><h3>Інформація про iPhone</h3><div class="kv">${kv.map((x) => `<div class="k">${x[0]}</div><div class="v">${esc(x[1] || '—')}</div><div>${x[1] ? `<button class="btn secondary small" data-copy="${esc(x[1])}">Копіювати</button>` : ''}</div>`).join('')}</div>
-          <p class="small" style="margin-top:12px">Це загальний стан активації пристрою. Чи ввімкнено «Знайти iPhone», дивіться в «Налаштування → Apple ID» на самому телефоні.</p>
-          <div class="row"><button class="btn secondary" data-go="proof">Додати номери до доказів власності</button></div></div>`;
+        const d = diag.udid === i.udid ? diag.data : null;
+        if (diag.udid !== i.udid && !diag.loading) setTimeout(() => loadDiag(i.udid), 0);
+        info = `<div id="diagBox">${d ? renderDiag(d) : '<div class="card"><span class="spin"></span>Збираю діагностику iPhone…</div>'}</div>`;
         break; }
     }
-    return `<div class="card"><div class="ready">${['drv', 'dev', 'trust'].map((k) => row(...R[k])).join('')}</div></div>${info}`;
+    // Коли все гаразд, рядки підключення стискаються в одну зелену плашку.
+    if (s.state === 'ready') {
+      const many = s.count > 1 ? ` · знайдено пристроїв: ${s.count}, показано перший` : '';
+      return `<div class="card banner ok"><span>✓ Драйвер Apple працює · iPhone підключено · довіру підтверджено${many}</span></div>${info}`;
+    }
+    return `<div class="card"><div class="ready">${['drv', 'dev', 'trust'].map((k) => row(...R[k])).join('')}</div><div class="row"><button class="btn secondary" id="devRefresh">Перевірити ще раз</button></div></div>${info}`;
   }
+
+  // ---------- Діагностика ----------
+  const diag = { udid: null, data: null, loading: false };
+  async function loadDiag(udid, force) {
+    if (diag.loading || (!force && diag.udid === udid)) return;
+    diag.loading = true;
+    let d = null;
+    try { d = await window.api.deviceDiag(udid); } catch (_) {}
+    diag.loading = false;
+    diag.udid = udid; diag.data = d && d.ok ? d : { ok: false };
+    const box = $('#diagBox');
+    if (box) box.innerHTML = renderDiag(diag.data);
+  }
+  const SIM = {
+    kCTSIMSupportSIMStatusReady: ['ok', 'Готова до роботи'],
+    kCTSIMSupportSIMStatusNotInserted: ['na', 'SIM-картки немає'],
+    kCTSIMSupportSIMStatusPINLocked: ['bad', 'Просить PIN'],
+    kCTSIMSupportSIMStatusPUKLocked: ['bad', 'Просить PUK'],
+    kCTSIMSupportSIMStatusOperatorLocked: ['bad', 'Заблоковано оператором'],
+    kCTSIMSupportSIMStatusNotReady: ['na', 'Не готова'],
+  };
+  const gb = (b) => (b == null ? '—' : `${(b / 1e9).toFixed(b >= 1e11 ? 0 : 1)} ГБ`);
+  function diagFacts(d) {
+    const act = d.security.activation;
+    const sim = SIM[d.sim.status] || (d.sim.status ? ['na', d.sim.status.replace(/^kCTSIMSupport(SIM)?(Status)?/, '')] : ['na', 'Невідомо']);
+    const b = d.battery;
+    const freePct = d.disk.total && d.disk.free != null ? Math.round((d.disk.free / (d.disk.data || d.disk.total)) * 100) : null;
+    return {
+      act: act === 'Activated' || act === 'FactoryActivated' ? ['ok', 'Активовано'] : act === 'Unactivated' ? ['bad', 'Не активовано'] : ['na', act || 'Невідомо'],
+      pass: d.security.passcode === true ? ['ok', 'Увімкнено'] : d.security.passcode === false ? ['warn', 'Не встановлено'] : ['na', 'Невідомо'],
+      find: d.security.findMy === true ? ['ok', 'Увімкнено'] : d.security.findMy === false ? ['na', 'Вимкнено'] : ['na', 'Не вдалося визначити'],
+      sim,
+      bat: b.health != null ? [b.health >= 80 ? 'ok' : 'bad', `${b.health}% ємності`] : b.level != null ? ['na', `Заряд ${b.level}%`] : ['na', 'Невідомо'],
+      disk: freePct != null ? [freePct < 10 ? 'warn' : 'ok', `Вільно ${gb(d.disk.free)}`] : ['na', 'Невідомо'],
+    };
+  }
+  // Поради: що з цим iPhone робити далі і в якому розділі.
+  function diagAdvice(d, f) {
+    const a = [];
+    if (f.act[0] === 'bad') a.push(['bad', 'iPhone не активовано', 'Якщо під час налаштування він просить чужий Apple ID, це блокування активації.', 'activation', 'Блокування активації']);
+    if (d.sim.status === 'kCTSIMSupportSIMStatusOperatorLocked') a.push(['bad', 'SIM-картку відхилено оператором', 'Схоже, iPhone прив’язаний до іншого оператора.', 'carrier', 'Прив’язка до оператора']);
+    if (/PINLocked|PUKLocked/.test(d.sim.status)) a.push(['bad', 'SIM-картка заблокована', 'Потрібен PIN або PUK від оператора.', 'sim', 'PIN і PUK SIM-картки']);
+    if (f.bat[0] === 'bad') a.push(['warn', 'Батарея зношена', 'Ємність нижче 80%: Apple радить заміну в авторизованому сервісі.', null, null, 'https://support.apple.com/iphone/repair', 'Ремонт Apple']);
+    if (f.disk[0] === 'warn') a.push(['warn', 'Мало вільного місця', 'Менше 10% пам’яті. Оновлення iOS і резервні копії можуть не вдатися.']);
+    if (d.security.findMy === true) a.push(['info', '«Знайти iPhone» увімкнено', 'Перед продажем чи скиданням вийдіть з Apple ID, інакше iPhone попросить ваш пароль.', 'buy', 'Купівля з рук']);
+    if (d.security.passcode === true) a.push(['info', 'Код-пароль встановлено', 'Забули його? Є офіційні способи, деякі зберігають дані.', 'passcode', 'Забули код екрана']);
+    if (!a.some((x) => x[0] === 'bad')) a.unshift(['ok', 'Блокувань не виявлено', 'iPhone активовано, SIM-картка не заблокована.']);
+    return a;
+  }
+  function renderDiag(d) {
+    if (!d || !d.ok) return `<div class="card warn"><h3>Не вдалося зібрати діагностику</h3><p>Розблокуйте iPhone і натисніть «Оновити діагностику».</p><div class="row"><button class="btn secondary" id="diagRefresh">Оновити діагностику</button></div></div>`;
+    const f = diagFacts(d);
+    const chip = (t, v) => `<div class="chip ${v[0]}"><span>${t}</span><b>${esc(v[1])}</b></div>`;
+    const kvRows = (rows) => `<div class="kv">${rows.filter((x) => x[1] !== '' && x[1] != null).map((x) => `<div class="k">${x[0]}</div><div class="v">${esc(x[1])}</div><div>${x[2] ? `<button class="btn secondary small" data-copy="${esc(x[1])}">Копіювати</button>` : ''}</div>`).join('')}</div>`;
+    const dv = d.device, b = d.battery, k = d.disk;
+    const used = k.total && k.free != null ? Math.max(0, Math.min(100, 100 - Math.round((k.free / (k.data || k.total)) * 100))) : null;
+    return `
+      <div class="card"><h3>Діагностика</h3>
+        <div class="chips">${chip('Активація', f.act)}${chip('Код-пароль', f.pass)}${chip('Знайти iPhone', f.find)}${chip('SIM-картка', f.sim)}${chip('Батарея', f.bat)}${chip('Пам’ять', f.disk)}</div>
+        <p class="small" style="margin-top:12px">Прив’язку до оператора кабелем надійно не перевірити: дивіться «Налаштування → Основні → Про пристрій → Блокування оператора».</p></div>
+      <div class="card"><h3>Що робити</h3><div class="advice">${diagAdvice(d, f).map((x) => `<div class="adv ${x[0]}"><i></i><div><b>${x[1]}</b><span>${x[2]}</span></div>${x[3] ? `<button class="btn secondary small" data-go="${x[3]}">${x[4]}</button>` : x[5] ? ext(x[5], x[6], 'btn secondary small') : ''}</div>`).join('')}</div></div>
+      <div class="dgrid">
+        <div class="card wide"><h3>Пристрій</h3>${kvRows([['Назва', dv.name], ['Модель', modelName(dv.model)], ['Номер моделі', dv.modelNumber], ['Колір корпусу', dv.color && /^#/.test(dv.color) ? dv.color : ''], ['iOS', dv.ios + (dv.build ? ` (${dv.build})` : '')], ['Серійний номер', dv.serial, 1], ['IMEI', dv.imei, 1], ['IMEI 2', dv.imei2, 1], ['Wi‑Fi', dv.wifi], ['Bluetooth', dv.bluetooth]])}</div>
+        <div class="card"><h3>Батарея</h3>${kvRows([['Ємність', b.health != null ? `${b.health}%` : (b.readable ? '—' : 'Не вдалося прочитати')], ['Цикли заряду', b.cycles], ['Заряд зараз', b.level != null ? `${b.level}%${b.charging ? ', заряджається' : ''}` : ''], ['Заводська ємність', b.design ? `${b.design} мА·год` : ''], ['Повна ємність зараз', b.full ? `${b.full} мА·год` : ''], ['Температура', b.temp != null ? `${b.temp} °C` : '']])}
+          ${b.health != null ? `<div class="meter"><i style="width:${b.health}%;background:${b.health >= 80 ? 'var(--ok)' : 'var(--danger)'}"></i></div>` : ''}</div>
+        <div class="card"><h3>Пам’ять</h3>${kvRows([['Обсяг', gb(k.total)], ['Вільно', gb(k.free)]])}
+          ${used != null ? `<div class="meter"><i style="width:${used}%"></i></div><p class="small" style="margin-top:6px">Зайнято ${used}%</p>` : ''}</div>
+        <div class="card wide"><h3>Зв’язок</h3>${kvRows([['SIM-картка', f.sim[1]], ['Номер телефону', d.sim.phone, 1], ['ICCID', d.sim.iccid, 1], ['Модем', d.sim.baseband]])}</div>
+      </div>
+      <div class="row"><button class="btn" id="diagCopy">Копіювати звіт</button><button class="btn secondary" id="diagRefresh">Оновити діагностику</button><button class="btn secondary" data-go="proof">Додати номери до доказів власності</button></div>`;
+  }
+  function diagReport(d) {
+    const f = diagFacts(d), dv = d.device, b = d.battery;
+    return [
+      `Звіт Reclaim · ${new Date().toLocaleString('uk-UA')}`,
+      `Пристрій: ${dv.name} · ${modelName(dv.model)} · ${dv.modelNumber}`,
+      `iOS: ${dv.ios} ${dv.build ? `(${dv.build})` : ''}`,
+      `Серійний номер: ${dv.serial}`, `IMEI: ${dv.imei}${dv.imei2 ? `, ${dv.imei2}` : ''}`,
+      `Активація: ${f.act[1]}`, `Код-пароль: ${f.pass[1]}`, `Знайти iPhone: ${f.find[1]}`, `SIM-картка: ${f.sim[1]}`,
+      `Батарея: ${b.health != null ? b.health + '%' : '—'}, циклів: ${b.cycles ?? '—'}`,
+      `Пам’ять: ${gb(d.disk.total)}, вільно ${gb(d.disk.free)}`,
+    ].join('\n');
+  }
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('#diagRefresh') && diag.udid) {
+      const box = $('#diagBox'); if (box) box.innerHTML = '<div class="card"><span class="spin"></span>Збираю діагностику iPhone…</div>';
+      loadDiag(diag.udid, true);
+    }
+    if (e.target.closest('#devRefresh') && devRefresh) devRefresh(true);
+    if (e.target.closest('#diagCopy') && diag.data && diag.data.ok) copy(diagReport(diag.data));
+  });
 
   function initDevice() {
     const body = $('#devBody');
@@ -657,7 +751,6 @@
     }
     devRefresh = refresh;
     renderHistory();
-    $('#devRefresh').addEventListener('click', () => refresh(true));
     refresh(true);
     timer = setInterval(() => refresh(false), 3000);
   }

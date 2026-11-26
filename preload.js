@@ -4,6 +4,7 @@ contextBridge.exposeInMainWorld('api', {
   openAppleDevices: () => ipcRenderer.invoke('open-apple-devices'),
   driverStatus: () => ipcRenderer.invoke('driver-status'),
   deviceStatus: () => ipcRenderer.invoke('device-status'),
+  deviceDiag: (udid) => ipcRenderer.invoke('device-diag', udid),
   devicePair: () => ipcRenderer.invoke('device-pair'),
   appInfo: () => ipcRenderer.invoke('app-info'),
   uninstall: () => ipcRenderer.invoke('uninstall'),
