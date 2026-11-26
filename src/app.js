@@ -3,6 +3,8 @@
 (() => {
   'use strict';
   const $ = (s, r = document) => r.querySelector(s);
+  // Номер версії коротко, як у «Тихому ПК»: 1.0.0 → 1.0, 0.3.1 лишається 0.3.1.
+  const ver = (v) => String(v || '').replace(/^v/i, '').replace(/^(\d+\.\d+)\.0$/, '$1');
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
   const ICONS = {
@@ -15,14 +17,24 @@
     exit: '<path d="M9.5 4.5H6A1.5 1.5 0 004.5 6v12A1.5 1.5 0 006 19.5h3.5M14.5 8l4 4-4 4M18.5 12h-9"/>',
     time: '<path d="M7 4h10M7 20h10M8 4c0 4 4 5 4 8s-4 4-4 8M16 4c0 4-4 5-4 8s4 4 4 8"/>',
     info: '<circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.2M12 7.9v.1"/>',
+    passcode: '<rect x="4" y="6.5" width="16" height="11" rx="2.5"/><path d="M8 12h.01M12 12h.01M16 12h.01"/>',
+    sim: '<path d="M8 3.5h6.5L18.5 7.5V19.5a1 1 0 01-1 1h-9.5a1 1 0 01-1-1v-15a1 1 0 011-1z"/><rect x="9.3" y="11" width="5.4" height="6" rx="1"/>',
+    carrier: '<path d="M12 20v-8M8.5 8.5a5 5 0 017 0M6 6a8.5 8.5 0 0112 0"/><circle cx="12" cy="11" r="1.2"/>',
+    cart: '<path d="M4 5h2l2 10h10l2-7H7.2"/><circle cx="9.5" cy="19" r="1.3"/><circle cx="16.5" cy="19" r="1.3"/>',
+    building: '<path d="M5 20V5.5A1.5 1.5 0 016.5 4h7A1.5 1.5 0 0115 5.5V20M15 10h3.5a1 1 0 011 1v9M3.5 20h17M8.5 8h3M8.5 12h3M8.5 16h3"/>',
+    heart: '<path d="M12 19.5s-7-4.3-7-9.4A3.9 3.9 0 0112 7.8a3.9 3.9 0 017 2.3c0 5.1-7 9.4-7 9.4z"/>',
+    backup: '<path d="M7 18.5h10a4 4 0 00.6-8 5.5 5.5 0 00-10.7 1.2A3.4 3.4 0 007 18.5z"/><rect x="10" y="12.5" width="4" height="3.5" rx=".8"/><path d="M10.8 12.5v-1a1.2 1.2 0 012.4 0v1"/>',
   };
   const COLORS = {
     home: '#007AFF', key: '#0A84FF', lock: '#5856D6', doc: '#34C759', phone: '#32ADE6',
     reset: '#FF9500', exit: '#8E8E93', time: '#FF2D55', info: '#636366',
+    passcode: '#FF9F0A', sim: '#30B0C7', carrier: '#00C7BE', cart: '#34C759', building: '#A2845E',
+    heart: '#FF375F', backup: '#5AC8FA',
   };
   const svg = (n) => `<svg viewBox="0 0 24 24">${ICONS[n]}</svg>`;
   const ico = (n, lg) => `<span class="ico${lg ? ' lg' : ''}" style="--c:${COLORS[n]}">${svg(n)}</span>`;
 
+  const tile = (go, title, sub) => `<button class="tile" data-go="${go}">${ico(SCREEN_ICON[go] || go, true)}<span class="tx"><b>${title}</b><span class="s">${sub}</span></span></button>`;
   const ext = (url, label, cls = 'btn') => `<button class="${cls}" data-ext="${url}">${label}</button>`;
   const steps = (list) =>
     `<ol class="steps">${list.map((s) => `<li><b>${s[0]}</b><span>${s[1] || ''}</span></li>`).join('')}</ol>`;
@@ -35,6 +47,14 @@
   const URL_SUPPORT = 'https://support.apple.com/uk-ua/contact';
   const URL_ICLOUD = 'https://www.icloud.com';
   const URL_ITUNES = 'https://www.apple.com/itunes/';
+  const URL_FIND = 'https://www.icloud.com/find';
+  const URL_PASSCODE = 'https://support.apple.com/105090';
+  const URL_PASSCODE_OLD = 'https://support.apple.com/105039';
+  const URL_CARRIER = 'https://support.apple.com/109316';
+  const URL_AL_SUPPORT = 'https://al-support.apple.com';
+  const URL_LEGACY = 'https://digital-legacy.apple.com';
+  const URL_DECEASED = 'https://support.apple.com/102431';
+  const URL_COVERAGE = 'https://checkcoverage.apple.com';
 
   const MODELS_ENTER = [
     ['iPhone 8 і новіші', 'Швидко натисніть і відпустіть кнопку збільшення гучності, потім зменшення гучності. Після цього утримуйте бічну кнопку, доки не з’явиться екран режиму відновлення (кабель і комп’ютер).'],
@@ -80,6 +100,34 @@
     exit: {
       does: ['Пояснює, як вийти з режиму відновлення без втрати даних', 'Показує комбінації кнопок за моделями'],
       doesnt: ['Не прошиває телефон', 'Не стирає дані: стирання можливе лише у програмі Apple за вашим підтвердженням'],
+    },
+    passcode: {
+      does: ['Підказує найшвидший офіційний шлях для вашої версії iOS', 'Пояснює, коли можна зберегти дані, а коли доведеться стерти iPhone'],
+      doesnt: ['Не підбирає код-пароль', 'Не обходить екран блокування'],
+    },
+    carrier: {
+      does: ['Показує, як перевірити, чи прив’язаний iPhone до оператора', 'Пояснює, як попросити оператора зняти прив’язку'],
+      doesnt: ['Не знімає прив’язку сам: це може зробити лише оператор', 'Не змінює IMEI і не ставить «чіпи»-обманки'],
+    },
+    sim: {
+      does: ['Пояснює різницю між кодом-паролем екрана, PIN і PUK SIM-картки', 'Підказує, де взяти PUK і як вимкнути запит PIN'],
+      doesnt: ['Не підбирає PIN чи PUK', 'Не відновлює заблоковану SIM-картку: її замінює оператор'],
+    },
+    buy: {
+      does: ['Дає чек-лист, що перевірити до оплати', 'Пояснює, як продавець має вийти з Apple ID і стерти телефон при вас'],
+      doesnt: ['Не перевіряє телефон за базами крадених пристроїв', 'Не допоможе з телефоном, з якого продавець не вийшов'],
+    },
+    mdm: {
+      does: ['Пояснює, що означає «Віддалене керування» і профілі', 'Підказує, як законно звільнити пристрій від керування'],
+      doesnt: ['Не видаляє керування без організації', 'Не обходить екран налаштування з віддаленим керуванням'],
+    },
+    legacy: {
+      does: ['Пояснює офіційний шлях Apple для родини власника, який помер', 'Підказує, які документи підготувати'],
+      doesnt: ['Не дає доступу до чужого облікового запису', 'Не прискорює розгляд запиту в Apple'],
+    },
+    backup: {
+      does: ['Пояснює, як скинути пароль зашифрованих резервних копій на самому iPhone', 'Підказує, що станеться зі старими копіями'],
+      doesnt: ['Не підбирає пароль резервної копії', 'Не розшифровує старі копії'],
     },
     screentime: {
       does: ['Показує офіційні способи змінити код-пароль Screen Time', 'Підказує, що робити, якщо код забуто'],
@@ -130,15 +178,59 @@
       <p class="lead">Оберіть, що сталося. Ми проведемо вас офіційним шляхом Apple, крок за кроком.</p>
       <div id="updBox"></div>
       <div id="homeBanner"></div>
+      <div class="home-group">Код і паролі</div>
       <div class="grid">
-        <button class="tile" data-go="appleid">${ico('key', true)}<b>Забув пароль Apple ID</b><span>Покрокове відновлення на iforgot.apple.com</span></button>
-        <button class="tile" data-go="activation">${ico('lock', true)}<b>iPhone просить Apple ID після скидання</b><span>Що таке блокування активації і що робити</span></button>
-        <button class="tile" data-go="reset">${ico('reset', true)}<b>Забув пароль екрана</b><span>Скидання через режим відновлення</span></button>
-        <button class="tile" data-go="screentime">${ico('time', true)}<b>Забув пароль Screen Time</b><span>Офіційні способи змінити код-пароль</span></button>
-        <button class="tile wide" data-go="device">${ico('phone', true)}<div><b>Переглянути інформацію про iPhone</b><span>Модель, версія iOS, серійний номер, IMEI. Підключіть телефон кабелем.</span></div></button>
+        ${tile('passcode', 'Забув код екрана', 'iPhone недоступний або просить код')}
+        ${tile('appleid', 'Забув пароль Apple ID', 'Відновлення на iforgot.apple.com')}
+        ${tile('screentime', 'Забув код Screen Time', 'Офіційні способи змінити код')}
+        ${tile('backup', 'Забув пароль резервної копії', 'Зашифровані копії на комп’ютері')}
+      </div>
+      <div class="home-group">Блокування</div>
+      <div class="grid">
+        ${tile('activation', 'Просить чужий Apple ID', 'Блокування активації після скидання')}
+        ${tile('carrier', 'Не бачить SIM іншого оператора', 'Прив’язка до оператора')}
+        ${tile('sim', 'Просить PIN або PUK SIM', 'Заблокована SIM-картка')}
+        ${tile('mdm', 'Пише «Віддалене керування»', 'Телефон компанії чи школи')}
+      </div>
+      <div class="home-group">Особливі випадки</div>
+      <div class="grid">
+        ${tile('buy', 'Купую iPhone з рук', 'Що перевірити до оплати')}
+        ${tile('legacy', 'iPhone рідної людини, яка померла', 'Офіційний шлях Apple для родини')}
+        ${tile('device', 'Інформація про iPhone', 'Модель, iOS, серійний номер, IMEI')}
+        ${tile('proof', 'Докази власності', 'Чек, серійний номер та IMEI в одному PDF')}
       </div>
       <p class="small" style="margin-top:24px">Reclaim не обходить захист Apple. Він допомагає власнику повернути доступ законно.</p>`,
       after: () => { renderUpdate(); initHome(); } },
+
+    { id: 'passcode', nav: 'Забули код екрана', sub: 'iPhone недоступний', icon: 'passcode', render: () => `
+      <h1>Забули код-пароль екрана</h1>
+      <p class="lead">Оберіть спосіб від першого до останнього. Перший зберігає дані, решта стирають iPhone, тож дані повернуться лише з резервної копії.</p>
+      ${modes('passcode')}
+      <div class="card"><h3>1. Змінили код менше ніж 72 години тому (iOS 17 і новіші)</h3>
+        <p>Старий код ще працює. Дані не зникнуть.</p>
+        ${steps([
+          ['Дочекайтеся екрана «iPhone недоступний»', 'Він з’являється після кількох неправильних спроб.'],
+          ['Натисніть «Забули код-пароль?»', 'Унизу екрана.'],
+          ['Оберіть «Ввести попередній код-пароль»', 'Введіть старий код і створіть новий.'],
+        ])}
+        <div class="row">${ext(URL_PASSCODE_OLD, 'Інструкція Apple', 'btn secondary')}</div></div>
+      <div class="card"><h3>2. Скидання прямо на iPhone, без комп’ютера</h3>
+        <p>Працює на iOS 15.2 і новіших, якщо iPhone у мережі (Wi‑Fi чи мобільний інтернет) і на ньому ввімкнено «Знайти iPhone».</p>
+        ${steps([
+          ['Екран «iPhone недоступний»', 'Вводьте код, доки він не з’явиться.'],
+          ['«Забули код-пароль?» → «Почати скидання iPhone»', 'На iOS 15.2 і 16 кнопка називається «Стерти iPhone».'],
+          ['Введіть пароль свого Apple ID', 'Так iPhone вийде з облікового запису.'],
+          ['Підтвердьте стирання', 'Після перезапуску налаштуйте iPhone і відновіть дані з копії.'],
+        ])}
+        <div class="row">${ext(URL_PASSCODE, 'Інструкція Apple', 'btn secondary')}</div></div>
+      <div class="card"><h3>3. Стерти через «Знайти» на iCloud.com</h3>
+        <p>З будь-якого комп’ютера чи телефону: увійдіть у свій Apple ID, оберіть iPhone і «Стерти пристрій».</p>
+        <div class="row">${ext(URL_FIND, 'Відкрити «Знайти» на iCloud.com', 'btn secondary')}</div></div>
+      <div class="card"><h3>4. Через комп’ютер</h3>
+        <p>Якщо попередні способи не підходять, скиньте iPhone у режимі відновлення.</p>
+        <div class="row"><button class="btn" data-go="reset">Скидання через комп’ютер</button></div></div>
+      <div class="card info"><h3>Бачите «Затримка безпеки»?</h3>
+        <p>Це «Захист викраденого пристрою», а не блокування. Поза знайомими місцями iPhone просить Face ID або Touch ID і годину чекання перед зміною пароля Apple ID чи коду. Просто дочекайтеся кінця таймера або поверніться додому чи на роботу.</p></div>` },
 
     { id: 'appleid', nav: 'Відновлення Apple ID', sub: 'Забули пароль чи пошту', icon: 'key', render: () => `
       <h1>Відновлення Apple ID</h1>
@@ -153,6 +245,13 @@
       ])}
         <div class="row">${ext(URL_IFORGOT, 'Відкрити iforgot.apple.com')}</div>
       </div>
+      <div class="card"><h3>Apple ID заблоковано або вимкнено</h3>
+        <ul class="plain">
+          <li><b>«Цей Apple ID заблоковано з міркувань безпеки»:</b> розблокуйте його на iforgot.apple.com своїм паролем або через підтвердження особи.</li>
+          <li><b>«Обліковий запис вимкнено в App Store та iTunes»:</b> це питання оплати чи безпеки, його вирішує лише підтримка Apple.</li>
+          <li><b>«Обліковий запис не активний»:</b> зверніться до підтримки Apple.</li>
+        </ul>
+        <div class="row">${ext(URL_IFORGOT, 'Розблокувати на iforgot.apple.com', 'btn secondary')}${ext(URL_SUPPORT, 'Підтримка Apple', 'btn secondary')}</div></div>
       <p>Не виходить? <button class="btn link" data-go="proof">Підготуйте докази власності</button> або ${ext(URL_SUPPORT, 'зверніться до підтримки Apple', 'btn link')}.</p>` },
 
     { id: 'activation', nav: 'Блокування активації', sub: 'iPhone просить чужий Apple ID', icon: 'lock', render: () => `
@@ -165,9 +264,10 @@
         <ul class="plain">
           <li><b>Це ваш телефон:</b> відновіть Apple ID (розділ «Відновлення Apple ID»).</li>
           <li><b>Купили б/в:</b> попросіть продавця зайти на iCloud.com → «Знайти iPhone» і видалити пристрій зі свого акаунта.</li>
-          <li><b>Продавця немає:</b> зверніться до підтримки Apple з чеком про покупку.</li>
+          <li><b>Продавця немає, але є оригінальний чек:</b> подайте запит на зняття блокування активації на сайті Apple. Потрібен чек від Apple або авторизованого продавця з серійним номером чи IMEI.</li>
+          <li><b>Власник помер:</b> дивіться розділ «Пристрій рідної людини».</li>
         </ul>
-        <div class="row">${ext(URL_ICLOUD, 'Відкрити iCloud.com', 'btn secondary')}${ext(URL_SUPPORT, 'Підтримка Apple', 'btn secondary')}</div></div>
+        <div class="row">${ext(URL_AL_SUPPORT, 'Запит на зняття блокування', 'btn')}${ext(URL_FIND, 'Відкрити «Знайти»', 'btn secondary')}<button class="btn secondary" data-go="legacy">Пристрій рідної людини</button></div></div>
       <div class="card info"><h3>Чесно про межі</h3>
         <p>Жодна програма не може законно зняти блокування активації. Пропозиції «розблокувати без Apple ID» часто шахрайські. Reclaim цього не робить і не робитиме.</p></div>` },
 
@@ -191,7 +291,7 @@
       <div class="row"><button class="btn secondary" id="devRefresh">Оновити</button></div>
       <div id="histBox"></div>`, after: initDevice },
 
-    { id: 'reset', nav: 'Скидання через режим відновлення', sub: 'Забули пароль екрана', icon: 'reset', render: () => `
+    { id: 'reset', nav: 'Скидання через ПК', sub: 'Режим відновлення, забули код', icon: 'reset', render: () => `
       <h1>Скидання через режим відновлення</h1>
       ${modes('reset')}
       <div class="card warn"><h3>Усі дані на пристрої буде стерто</h3>
@@ -206,7 +306,7 @@
       ])}</div>
       <div class="card"><h3>Комбінації кнопок</h3>${modelTabs('enter', MODELS_ENTER)}</div>` },
 
-    { id: 'exit', nav: 'Вихід із режиму відновлення', sub: 'iPhone завис на екрані кабелю', icon: 'exit', render: () => `
+    { id: 'exit', nav: 'Вихід із відновлення', sub: 'Завис на екрані кабелю', icon: 'exit', render: () => `
       <h1>iPhone завис на екрані відновлення?</h1>
       <p class="lead">Спершу спробуйте вийти без втрати даних.</p>
       ${modes('exit')}
@@ -218,7 +318,7 @@
       <div class="card"><h3>Комбінації кнопок</h3>${modelTabs('exit', MODELS_EXIT)}</div>
       <div class="card info"><h3>Не допомагає?</h3><div class="row">${ext(URL_SUPPORT, 'Звернутися до підтримки Apple')}</div></div>` },
 
-    { id: 'screentime', nav: 'Screen Time', sub: 'Забули код-пароль', icon: 'time', render: () => `
+    { id: 'screentime', nav: 'Код Screen Time', sub: 'Екранний час', icon: 'time', render: () => `
       <h1>Забули пароль Screen Time</h1>
       <p class="lead">Є три офіційні шляхи, від простого до крайнього.</p>
       ${modes('screentime')}
@@ -226,6 +326,84 @@
       <div class="card"><h3>Б. Забув пароль</h3><p>Налаштування → Екранний час → Змінити код-пароль → «Забули код-пароль?» і введіть свій Apple ID.</p></div>
       <div class="card"><h3>В. Не допомогло</h3><p>Скиньте пристрій (розділ «Скидання через режим відновлення») і налаштуйте його як новий, без відновлення з копії.</p></div>
       <p class="small">Порада: для дитини налаштуйте «Сімейний доступ», щоб батьки могли змінити код самі.</p>` },
+
+    { id: 'backup', nav: 'Пароль резервної копії', sub: 'Зашифровані копії', icon: 'backup', render: () => `
+      <h1>Забули пароль резервної копії</h1>
+      <p class="lead">Зашифровані копії iPhone на комп’ютері захищені окремим паролем. Відновити старі копії без нього неможливо, але для нових копій пароль можна скинути.</p>
+      ${modes('backup')}
+      <div class="card">${steps([
+        ['Відкрийте на iPhone налаштування', 'Налаштування → Основні → Перенесення або скидання iPhone.'],
+        ['Оберіть «Скинути» → «Скинути всі налаштування»', 'Дані й фото лишаться. Скинуться лише налаштування: Wi‑Fi, шпалери, яскравість, а також пароль шифрування копій.'],
+        ['Зробіть нову резервну копію', 'Підключіть iPhone до Apple Devices або iTunes і створіть копію. Якщо ввімкнете шифрування, задайте новий пароль і збережіть його в менеджері паролів.'],
+      ])}</div>
+      <div class="card warn"><h3>Старі зашифровані копії</h3><p>Попередні зашифровані копії однаково не відкриються без старого пароля. Програми, що обіцяють «зламати» їх, не потрібні: краще зробіть нову копію.</p></div>` },
+
+    { id: 'carrier', nav: 'Прив’язка до оператора', sub: 'Інша SIM не працює', icon: 'carrier', render: () => `
+      <h1>Прив’язка до оператора</h1>
+      <p class="lead">Деякі iPhone, куплені в оператора з контрактом, працюють лише з його SIM-картками. Зняти прив’язку може тільки цей оператор, Apple цього не робить.</p>
+      ${modes('carrier')}
+      <div class="card"><h3>Як перевірити</h3>${steps([
+        ['Налаштування → Основні → Про пристрій', ''],
+        ['Знайдіть рядок «Блокування оператора»', 'Якщо там написано «Без обмежень SIM» (No SIM restrictions), iPhone ні до кого не прив’язаний.'],
+      ])}</div>
+      <div class="card"><h3>Як зняти прив’язку</h3>${steps([
+        ['Зверніться до оператора, якому належить прив’язка', 'Зазвичай потрібні IMEI, договір і погашений контракт. IMEI є в розділі «Мій iPhone».'],
+        ['Дочекайтеся підтвердження', 'Оператор знімає прив’язку у своїй системі.'],
+        ['Вставте SIM іншого оператора', 'Якщо iPhone не активується, зробіть резервну копію, скиньте його і відновіть з копії.'],
+      ])}<div class="row">${ext(URL_CARRIER, 'Інструкція Apple', 'btn secondary')}<button class="btn secondary" data-go="device">Знайти IMEI</button></div></div>
+      <div class="card info"><h3>Обережно з «анлоками»</h3><p>Сервіси, що змінюють IMEI або ставлять під SIM «чіпи»-обманки, працюють нестабільно, а зміна IMEI в багатьох країнах незаконна. Законний шлях лише один: оператор.</p></div>` },
+
+    { id: 'sim', nav: 'PIN і PUK SIM-картки', sub: 'Заблокована SIM', icon: 'sim', render: () => `
+      <h1>SIM-картка просить PIN або PUK</h1>
+      <p class="lead">PIN захищає саму SIM-картку, а не iPhone. Це не код-пароль екрана, тож його не скинути через Apple.</p>
+      ${modes('sim')}
+      <div class="card"><h3>Якщо просить PIN</h3>
+        <p>Введіть PIN SIM-картки. Стандартний PIN часто вказаний на пластиковій картці, з якої виламали SIM. Не вгадуйте: після трьох неправильних спроб SIM попросить PUK.</p></div>
+      <div class="card"><h3>Якщо просить PUK</h3>${steps([
+        ['Візьміть PUK у оператора', 'Він є на пластиковій картці від SIM, в особистому кабінеті або в службі підтримки оператора.'],
+        ['Введіть PUK і новий PIN', ''],
+        ['Не вгадуйте', 'Після кількох неправильних PUK (зазвичай 10) SIM блокується назавжди, і її доведеться замінити в оператора. Номер при цьому зберігається.'],
+      ])}</div>
+      <div class="card"><h3>Як вимкнути або змінити PIN</h3><p>Налаштування → Мобільний зв’язок → PIN-код SIM.</p></div>` },
+
+    { id: 'buy', nav: 'Купівля з рук', sub: 'Перевірка перед покупкою', icon: 'cart', render: () => `
+      <h1>Купуєте iPhone з рук?</h1>
+      <p class="lead">Найчастіше блокування активації з’являється саме після покупки б/в. Перевірте все до оплати.</p>
+      ${modes('buy')}
+      <div class="card">${steps([
+        ['Продавець виходить з Apple ID при вас', 'Налаштування → [ім’я] → Вийти. Потрібен його пароль. Якщо він «забув пароль», не купуйте.'],
+        ['Продавець стирає iPhone при вас', 'Налаштування → Основні → Перенесення або скидання iPhone → Стерти весь вміст і налаштування.'],
+        ['Увімкніть iPhone і пройдіть налаштування до кінця', 'Якщо він просить чужий Apple ID, телефон заблоковано. Не платіть.'],
+        ['Перевірте прив’язку до оператора', 'Налаштування → Основні → Про пристрій → «Блокування оператора».'],
+        ['Звірте серійний номер', 'Номер у налаштуваннях має збігатися з коробкою. Перевірте його на сайті покриття Apple.'],
+        ['Візьміть чек або розписку', 'Знадобиться, якщо колись доведеться звертатися в Apple.'],
+      ])}<div class="row">${ext(URL_COVERAGE, 'Перевірити серійний номер', 'btn secondary')}</div></div>
+      <div class="card info"><h3>Продавець уже далеко?</h3><p>Попросіть його видалити iPhone дистанційно: iCloud.com → «Знайти» → оберіть пристрій → «Видалити з облікового запису».</p>
+        <div class="row">${ext(URL_FIND, 'Відкрити «Знайти»', 'btn secondary')}</div></div>` },
+
+    { id: 'mdm', nav: 'Пристрій організації', sub: 'Віддалене керування', icon: 'building', render: () => `
+      <h1>«Віддалене керування» на iPhone</h1>
+      <p class="lead">Якщо під час налаштування з’являється «Віддалене керування» або в iPhone є профіль компанії чи школи, ним керує організація.</p>
+      ${modes('mdm')}
+      <div class="card"><h3>Що робити</h3><ul class="plain">
+        <li><b>Телефон видали на роботі чи в навчальному закладі:</b> зверніться до їхнього IT-відділу. Лише вони можуть звільнити пристрій.</li>
+        <li><b>Купили такий телефон:</b> попросіть продавця або організацію, яка його продала, прибрати iPhone зі своєї системи керування (Apple Business Manager чи School Manager). Без цього керування повертатиметься після кожного скидання.</li>
+        <li><b>Профіль поставили ви самі:</b> Налаштування → Основні → Керування VPN і пристроєм → оберіть профіль → Видалити.</li>
+      </ul></div>
+      <div class="card info"><h3>Чесно про межі</h3><p>Обходити віддалене керування на чужому пристрої незаконно. Reclaim лише підказує, до кого звернутися.</p></div>` },
+
+    { id: 'legacy', nav: 'Пристрій рідної людини', sub: 'Власник помер', icon: 'heart', render: () => `
+      <h1>iPhone рідної людини, яка померла</h1>
+      <p class="lead">Співчуваємо вашій втраті. Apple має офіційні шляхи для родини, і їх можна пройти без поспіху.</p>
+      ${modes('legacy')}
+      <div class="card"><h3>1. Вас призначено контактом спадку</h3>
+        <p>Якщо людина додала вас як контакт спадку (Legacy Contact), у вас є ключ доступу. Подайте запит на сайті Apple разом зі свідоцтвом про смерть.</p>
+        <div class="row">${ext(URL_LEGACY, 'Цифровий спадок Apple', 'btn')}</div></div>
+      <div class="card"><h3>2. Контакту спадку немає</h3>
+        <p>Родина може попросити Apple надати доступ до облікового запису або зняти блокування активації. Зазвичай потрібні свідоцтво про смерть, документ про право на спадок або рішення суду, а для зняття блокування ще й підтвердження покупки пристрою.</p>
+        <div class="row">${ext(URL_DECEASED, 'Як подати запит до Apple', 'btn secondary')}${ext(URL_AL_SUPPORT, 'Запит на зняття блокування', 'btn secondary')}</div></div>
+      <div class="card info"><h3>Що підготувати</h3><p>Чек на пристрій, серійний номер та IMEI. Їх можна зібрати в розділі «Докази власності».</p>
+        <div class="row"><button class="btn secondary" data-go="proof">Докази власності</button></div></div>` },
 
     { id: 'about', nav: 'Про застосунок', sub: 'Версія, видалення', icon: 'info', bottom: true, render: () => `
       <h1>Про Reclaim</h1>
@@ -248,22 +426,68 @@
         <div class="row"><button class="btn danger" id="uninstall">Видалити Reclaim…</button></div></div>`, after: initAbout },
   ];
 
+  const SCREEN_ICON = Object.fromEntries(SCREENS.map((x) => [x.id, x.icon]));
+
   // ---------- Навігація ----------
+  // Групи бокового меню. Кожну можна згорнути; стан запам’ятовується.
+  const GROUPS = [
+    ['codes', 'Код і паролі', ['passcode', 'appleid', 'screentime', 'backup']],
+    ['locks', 'Блокування', ['activation', 'carrier', 'sim', 'mdm']],
+    ['special', 'Особливі випадки', ['buy', 'legacy', 'proof']],
+    ['iphone', 'Мій iPhone', ['device', 'reset', 'exit']],
+  ];
+  const THEMES = [['system', 'Авто'], ['light', 'Світла'], ['dark', 'Темна'], ['glass', 'Скло']];
+  const CHEV = '<svg class="chev" viewBox="0 0 12 12"><path d="M3 4.5l3 3 3-3"/></svg>';
+  const SEARCH = '<svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/></svg>';
+  const closedGroups = () => { try { return JSON.parse(localStorage.getItem('navClosed') || '[]'); } catch (_) { return []; } };
   const sidebar = $('#sidebar'), page = $('#page');
+  const byId = (id) => SCREENS.find((x) => x.id === id);
+
   function buildSidebar() {
-    const item = (s) => `<button class="nav" data-go="${s.id}">${ico(s.icon)}<span class="t"><b>${s.nav}</b><small>${s.sub}</small></span></button>`;
-    const body = SCREENS.filter((s) => !s.bottom);
+    const item = (sc) => `<button class="nav" data-go="${sc.id}" title="${esc(sc.sub)}" data-q="${esc((sc.nav + ' ' + sc.sub).toLowerCase())}">${ico(sc.icon)}<span class="t">${sc.nav}</span></button>`;
+    const closed = closedGroups();
     sidebar.innerHTML =
       `<div class="brand">${ico('phone')}Reclaim</div>` +
-      item(body[0]) +
-      '<div class="group">Відновлення доступу</div>' + body.slice(1, 4).map(item).join('') +
-      '<div class="group">Мій iPhone</div>' + body.slice(4).map(item).join('') +
+      `<label class="search">${SEARCH}<input id="navSearch" type="search" placeholder="Пошук" autocomplete="off" spellcheck="false"></label>` +
+      item(byId('home')) +
+      GROUPS.map(([gid, title, ids]) => {
+        const c = closed.includes(gid) ? ' closed' : '';
+        return `<button class="group${c}" data-group="${gid}">${title}${CHEV}</button><div class="items${c}" data-items="${gid}">${ids.map((id) => item(byId(id))).join('')}</div>`;
+      }).join('') +
+      '<div class="nomatch" id="noMatch" hidden>Нічого не знайдено</div>' +
       '<div class="spacer"></div><div class="sep"></div>' +
       '<div class="seg-label">Тема</div>' +
-      `<div class="seg" id="themeSeg">${[['system', 'Системна'], ['light', 'Світла'], ['dark', 'Темна']].map((t) => `<button data-theme-set="${t[0]}">${t[1]}</button>`).join('')}</div>` +
-      SCREENS.filter((s) => s.bottom).map(item).join('');
+      `<div class="seg" id="themeSeg">${THEMES.map((t) => `<button data-theme-set="${t[0]}">${t[1]}</button>`).join('')}</div>` +
+      SCREENS.filter((x) => x.bottom).map(item).join('');
     markTheme();
+    $('#navSearch').addEventListener('input', filterNav);
   }
+  function toggleGroup(gid, open) {
+    const g = $(`[data-group="${gid}"]`), it = $(`[data-items="${gid}"]`);
+    if (!g) return;
+    const isOpen = open === undefined ? g.classList.contains('closed') : open;
+    g.classList.toggle('closed', !isOpen); it.classList.toggle('closed', !isOpen);
+    const set = new Set(closedGroups());
+    if (isOpen) set.delete(gid); else set.add(gid);
+    try { localStorage.setItem('navClosed', JSON.stringify([...set])); } catch (_) {}
+  }
+  // Пошук: показує лише збіги, групи при цьому розгорнуті.
+  function filterNav() {
+    const q = $('#navSearch').value.trim().toLowerCase();
+    let any = false;
+    document.querySelectorAll('.sidebar .nav[data-q]').forEach((n) => {
+      const hit = !q || n.dataset.q.includes(q);
+      n.hidden = !hit; if (hit && q) any = true;
+    });
+    GROUPS.forEach(([gid]) => {
+      const it = $(`[data-items="${gid}"]`), g = $(`[data-group="${gid}"]`);
+      const vis = [...it.querySelectorAll('.nav')].some((n) => !n.hidden);
+      if (q) { it.classList.remove('closed'); g.hidden = !vis; it.hidden = !vis; }
+      else { g.hidden = false; it.hidden = false; it.classList.toggle('closed', g.classList.contains('closed')); }
+    });
+    $('#noMatch').hidden = !q || any;
+  }
+
   function currentTheme() { return document.documentElement.getAttribute('data-theme') || 'system'; }
   function markTheme() {
     document.querySelectorAll('[data-theme-set]').forEach((b) => b.classList.toggle('on', b.dataset.themeSet === currentTheme()));
@@ -272,7 +496,19 @@
     document.documentElement.setAttribute('data-theme', t);
     try { localStorage.setItem('theme', t); } catch (_) {}
     markTheme();
+    applyGlass();
   }
+  // «Скло»: підкладаємо розмиті шпалери робочого стола. Немає шпалер — м’яке синьо-фіолетове сяйво.
+  async function applyGlass() {
+    const root = document.documentElement;
+    if (currentTheme() !== 'glass') return;
+    let w = null;
+    try { w = await window.api.wallpaper(); } catch (_) {}
+    if (currentTheme() !== 'glass') return;
+    if (w && w.url) { root.style.setProperty('--wall', `url("${w.url}")`); root.setAttribute('data-wall', w.light > 0.55 ? 'light' : 'dark'); }
+    else { root.style.removeProperty('--wall'); root.removeAttribute('data-wall'); }
+  }
+  window.addEventListener('focus', applyGlass); // шпалери могли змінитися, поки вікно було у фоні
 
   function go(id) {
     clearInterval(timer); timer = null; devRefresh = null;
@@ -280,6 +516,8 @@
     page.innerHTML = `<div class="page-ico">${ico(s.icon, true)}</div>` + s.render();
     page.style.animation = 'none'; void page.offsetWidth; page.style.animation = '';
     document.querySelectorAll('.nav').forEach((n) => n.classList.toggle('active', n.dataset.go === s.id));
+    const grp = GROUPS.find((g) => g[2].includes(s.id));
+    if (grp && $(`[data-group="${grp[0]}"]`)?.classList.contains('closed')) toggleGroup(grp[0], true);
     $('.content').scrollTop = 0;
     if (s.after) s.after();
   }
@@ -297,6 +535,7 @@
   document.addEventListener('click', async (e) => {
     const g = e.target.closest('[data-go]'); if (g) return go(g.dataset.go);
     const th = e.target.closest('[data-theme-set]'); if (th) return setTheme(th.dataset.themeSet);
+    const gr = e.target.closest('[data-group]'); if (gr) return toggleGroup(gr.dataset.group);
     const x = e.target.closest('[data-ext]'); if (x) return window.api.openExternal(x.dataset.ext);
     const st = e.target.closest('[data-store]'); if (st) return window.api.openAppleDevices();
     const cp = e.target.closest('[data-copy]'); if (cp) return copy(cp.dataset.copy);
@@ -428,14 +667,14 @@
     const info = await window.api.appInfo();
     const d = await window.api.driverStatus();
     if (!$('#abVer')) return;
-    $('#abVer').textContent = info.version + (info.packaged ? '' : ' (запуск із папки)');
+    $('#abVer').textContent = ver(info.version) + (info.packaged ? '' : ' (запуск із папки)');
     $('#abTools').textContent = info.tools ? 'Знайдено (libimobiledevice)' : 'Не знайдено';
     $('#abDrv').textContent = !d.installed ? 'Не встановлено' : d.running ? 'Працює' : 'Службу зупинено';
     renderUpdate();
     const log = await window.api.changelog();
     if ($('#abLog')) {
       $('#abLog').innerHTML = log.length
-        ? log.map((v) => `<h4 style="margin:12px 0 4px;color:var(--text)">Версія ${esc(v.version)}${v.version === info.version ? ' (поточна)' : ''}</h4><ul class="plain">${v.items.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>`).join('')
+        ? log.map((v) => `<h4 style="margin:12px 0 4px;color:var(--text)">Версія ${esc(ver(v.version))}${ver(v.version) === ver(info.version) ? ' (поточна)' : ''}</h4><ul class="plain">${v.items.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>`).join('')
         : 'Журнал змін недоступний.';
     }
     $('#uninstall').addEventListener('click', async () => {
@@ -457,18 +696,18 @@
     const home = $('#updBox');
     if (home) {
       home.innerHTML = u && u.ok && u.newer
-        ? `<div class="card banner"><div><b>Вийшла нова версія ${esc(u.latest)}</b><br><span class="small">У вас ${esc(u.current)}. Відкриється сторінка завантаження, нічого не встановиться саме.</span></div>
-           <div class="row" style="margin:0"><button class="btn" data-release="1">Оновити до ${esc(u.latest)}</button></div></div>` : '';
+        ? `<div class="card banner"><div><b>Вийшла нова версія ${esc(ver(u.latest))}</b><br><span class="small">У вас ${esc(ver(u.current))}. Відкриється сторінка завантаження, нічого не встановиться саме.</span></div>
+           <div class="row" style="margin:0"><button class="btn" data-release="1">Оновити до ${esc(ver(u.latest))}</button></div></div>` : '';
     }
     const ab = $('#abUpd');
     if (ab) {
       ab.textContent = !u ? 'Перевіряю…'
         : !u.ok ? 'Не вдалося перевірити (немає інтернету або GitHub не відповів).'
-        : u.newer ? `Доступна версія ${u.latest}. У вас ${u.current}.`
-        : u.latest ? `У вас остання версія (${u.current}).`
+        : u.newer ? `Доступна версія ${ver(u.latest)}. У вас ${ver(u.current)}.`
+        : u.latest ? `У вас остання версія (${ver(u.current)}).`
         : 'Опублікованих версій ще немає.';
       const row = $('#abUpdRow');
-      if (row) row.innerHTML = (u && u.ok && u.newer ? `<button class="btn" data-release="1">Оновити до ${esc(u.latest)}</button>` : '')
+      if (row) row.innerHTML = (u && u.ok && u.newer ? `<button class="btn" data-release="1">Оновити до ${esc(ver(u.latest))}</button>` : '')
         + '<button class="btn secondary" id="abCheck">Шукати оновлення</button>';
       const c = $('#abCheck');
       if (c) c.addEventListener('click', async () => {
@@ -519,6 +758,7 @@
   });
 
   buildSidebar();
+  applyGlass();
   go('home');
   checkUpdate();
   setInterval(checkUpdate, 60 * 60 * 1000); // далі раз на годину

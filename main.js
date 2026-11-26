@@ -2,7 +2,7 @@
 // Застосунок нічого не обходить: він відкриває офіційні сторінки Apple,
 // читає базову інформацію про iPhone вбудованими утилітами libimobiledevice
 // і просить пристрій показати системне вікно «Довіряти цьому комп'ютеру».
-const { app, BrowserWindow, ipcMain, shell, dialog, net: electronNet } = require('electron');
+const { app, BrowserWindow, ipcMain, shell, dialog, nativeImage, net: electronNet } = require('electron');
 const { execFile, spawn } = require('child_process');
 const net = require('net');
 const path = require('path');
@@ -16,6 +16,10 @@ const ALLOWED_HOSTS = [
   'getsupport.apple.com',
   'www.icloud.com',
   'www.apple.com',
+  'account.apple.com',
+  'al-support.apple.com',
+  'digital-legacy.apple.com',
+  'checkcoverage.apple.com',
   'apps.microsoft.com',
 ];
 const APPLE_DEVICES_STORE_ID = '9NP83LWLPZ9K'; // «Apple Devices» від Apple у Microsoft Store
@@ -62,6 +66,45 @@ function createWindow() {
     if (!url.startsWith('file:')) e.preventDefault();
   });
 }
+
+// ---------- Тема «Скло»: шпалери робочого стола ----------
+// Беремо поточні шпалери Windows, зменшуємо до маленької копії (її однаково розмиває CSS)
+// і повертаємо як data-URL разом із середньою яскравістю. Нікуди нічого не надсилається.
+function wallpaperPath() {
+  return new Promise((resolve) => {
+    if (process.platform !== 'win32') return resolve(null);
+    execFile('reg', ['query', 'HKCU\\Control Panel\\Desktop', '/v', 'WallPaper'], { windowsHide: true, timeout: 4000, encoding: 'utf8' }, (err, out) => {
+      const m = /WallPaper\s+REG_\w+\s+(.+)/i.exec(String(out || ''));
+      const reg = m ? m[1].trim() : '';
+      const cached = path.join(process.env.APPDATA || '', 'Microsoft', 'Windows', 'Themes', 'TranscodedWallpaper');
+      resolve([reg, cached].find((f) => f && fs.existsSync(f)) || null);
+    });
+  });
+}
+let wallCache = { key: '', data: null };
+async function wallpaper() {
+  try {
+    const file = await wallpaperPath();
+    if (!file) return null;
+    const st = fs.statSync(file);
+    const key = file + ':' + st.mtimeMs + ':' + st.size;
+    if (wallCache.key === key) return wallCache.data;
+    let img = nativeImage.createFromBuffer(fs.readFileSync(file));
+    if (img.isEmpty()) return null;
+    const sz = img.getSize();
+    img = img.resize({ width: 320, height: Math.max(1, Math.round(320 * sz.height / sz.width)), quality: 'good' });
+    // Середня яскравість: на світлих шпалерах затемнення буде сильнішим.
+    const tiny = img.resize({ width: 24, height: 16 }).toBitmap(); // BGRA
+    let sum = 0;
+    for (let i = 0; i < tiny.length; i += 4) sum += 0.0722 * tiny[i] + 0.7152 * tiny[i + 1] + 0.2126 * tiny[i + 2];
+    const light = sum / (tiny.length / 4) / 255;
+    wallCache = { key, data: { url: 'data:image/jpeg;base64,' + img.toJPEG(80).toString('base64'), light } };
+    return wallCache.data;
+  } catch (_) {
+    return null;
+  }
+}
+ipcMain.handle('wallpaper', () => wallpaper());
 
 // ---------- Вбудовані утиліти ----------
 function toolPath(name) {

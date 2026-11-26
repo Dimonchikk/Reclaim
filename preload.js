@@ -12,5 +12,6 @@ contextBridge.exposeInMainWorld('api', {
   changelog: () => ipcRenderer.invoke('changelog'),
   historyList: () => ipcRenderer.invoke('history-list'),
   historyClear: () => ipcRenderer.invoke('history-clear'),
+  wallpaper: () => ipcRenderer.invoke('wallpaper'),
   saveProofPdf: (data) => ipcRenderer.invoke('save-proof-pdf', data),
 });

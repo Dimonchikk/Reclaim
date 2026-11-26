@@ -1,7 +1,7 @@
 # Reclaim — збирання інсталятора на GitHub.
 # Вкладка Actions → «Збирання» → «Run workflow»:
 # • поле «Версія» порожнє — пробне збирання, файл з'явиться внизу сторінки запуску в «Artifacts»;
-# • у полі «Версія» число (наприклад 0.3.0) — GitHub збере Reclaim-setup.exe і створить ЧЕРНЕТКУ релізу v0.3.0
+# • у полі «Версія» число (наприклад 1.0 або 1.0.1) — GitHub збере Reclaim-setup.exe і створить ЧЕРНЕТКУ релізу v0.3.0
 #   з описом із CHANGES.md (розділ «## 0.3.0»). Перевір файл і натисни «Publish release».
 name: Збирання
 
@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Версія для релізу (наприклад 0.3.0). Порожньо — лише пробне збирання.'
+        description: 'Версія для релізу (наприклад 1.0). Порожньо — лише пробне збирання.'
         required: false
         default: ''
 
@@ -33,8 +33,10 @@ jobs:
           VER: ${{ inputs.version }}
         run: |
           VER="${VER#v}"
+          # Коротка версія «1.0» у package.json записується як «1.0.0» (npm вимагає три числа).
+          FULL="$VER"; [[ "$FULL" =~ ^[0-9]+\.[0-9]+$ ]] && FULL="$FULL.0"
           # Номер у package.json має збігатися з номером релізу, інакше застосунок покаже не ту версію.
-          grep -q "\"version\": \"$VER\"" package.json || { echo "::error::У package.json інша версія: зміни \"version\" на \"$VER\"."; exit 1; }
+          grep -q "\"version\": \"$FULL\"" package.json || { echo "::error::У package.json інша версія: зміни \"version\" на \"$FULL\"."; exit 1; }
 
       - run: npm ci
       - run: npm run dist
